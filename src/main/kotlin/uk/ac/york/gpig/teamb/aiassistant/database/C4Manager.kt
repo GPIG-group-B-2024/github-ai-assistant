@@ -132,7 +132,6 @@ class C4Manager(
                 )
             }
         logger.info("Found ${relationships.size} relationships")
-
         // write new entities to database and link the new workspace to github repo
         // TODO: discuss how to handle several c4 workspace creations
         //  - do we delete the existing workspace? do we keep a list of workspaces (and creation date) for each repo?
