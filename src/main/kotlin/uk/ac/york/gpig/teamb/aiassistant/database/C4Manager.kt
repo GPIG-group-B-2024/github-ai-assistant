@@ -1,56 +1,31 @@
 package uk.ac.york.gpig.teamb.aiassistant.database
 
-import com.structurizr.dsl.StructurizrDslParser
-import com.structurizr.model.Component
-import com.structurizr.model.Container
-import com.structurizr.model.Person
-import com.structurizr.model.SoftwareSystem
-import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
-import org.springframework.transaction.support.TransactionTemplate
-import uk.ac.york.gpig.teamb.aiassistant.database.conversions.toStructurizrString
 import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4ElementEntity
-import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4RelationshipEntity
-import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4WorkspaceEntity
 import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.NotFoundException.NotFoundByNameException
 import uk.ac.york.gpig.teamb.aiassistant.database.facades.C4NotationReadFacade
-import uk.ac.york.gpig.teamb.aiassistant.database.facades.C4NotationWriteFacade
-import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import java.util.UUID
 
 @Service
 class C4Manager(
     private val c4NotationReadFacade: C4NotationReadFacade,
-    private val c4NotationWriteFacade: C4NotationWriteFacade,
-    private val transactionTemplate: TransactionTemplate,
 ) {
-    private val logger = LoggerFactory.getLogger(C4Manager::class.java)
-
-    /**
-     * Convert a structurizr workspace entity to a valid structurizr-compliant string for passing forward to an LLM.
-     *
-     * Note: doesn't include a `views` or `styles` block (doesn't prevent it from being compiled)
-     *
-     * */
     fun gitRepoToStructurizrDsl(repoName: String): String {
         val workspace =
             c4NotationReadFacade.getRepositoryWorkspace(
                 repoName,
             ) ?: throw NotFoundByNameException(repoName, "github repository")
-        logger.info("Found repository with name $repoName")
+
         val members = c4NotationReadFacade.getMembers(workspace.id)
-        logger.info("Found ${members.size} members in repo $repoName")
         val relationships = c4NotationReadFacade.getRelationships(workspace.id)
-        logger.info("Found ${relationships.size} relationships in repo $repoName")
+
         val memberToChildren = members.groupBy { it.parentId }
-        val componentsBlock = memberToChildren[null]!!.joinToString("\n|\t\t") { it.printWithChildren(memberToChildren, 2) }
+        val componentsBlock = memberToChildren[null]!!.joinToString("\n|\t\t") { it.printWithChildren(memberToChildren, 1) }
         val relationshipsBlock = relationships.joinToString("\n|\t\t") { it.toStructurizrString() }
         return """
             |${workspace.toStructurizrString()}{
-            |   model {
-            |       $componentsBlock
-            |       $relationshipsBlock
-            |   }
+            |   $componentsBlock
+            |   $relationshipsBlock
             |}
             """.trimMargin()
     }
@@ -154,7 +129,7 @@ class C4Manager(
         memberToChildren: Map<UUID?, List<C4ElementEntity>>,
         indent: Int,
     ): String {
-        val header = "${this.variableName} = ${this.type.toStructurizrString()} \"${this.name}\" \"${this.description}\""
+        val header = "\"${this.name}\" \"${this.description}\""
         val children = memberToChildren[this.id]
         val indentString = "\t".repeat(indent)
         return header +
