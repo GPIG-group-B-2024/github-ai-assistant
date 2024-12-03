@@ -48,6 +48,10 @@ dependencies {
   // =========================
   implementation(
       "com.structurizr:structurizr-dsl:3.1.0") // for parsing incoming structurizr content from LLM
+  implementation(
+      "com.fasterxml.jackson.module:jackson-module-jsonSchema-jakarta:2.18.2") // JSON schema
+  // generation
+  // (openAI)
   testImplementation("org.springframework.boot:spring-boot-starter-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("io.strikt:strikt-core:0.35.1") // assertions
