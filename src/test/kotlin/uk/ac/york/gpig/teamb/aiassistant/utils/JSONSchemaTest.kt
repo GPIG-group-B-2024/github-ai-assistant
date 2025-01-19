@@ -1,5 +1,6 @@
 package uk.ac.york.gpig.teamb.aiassistant.utils
 
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.StructuredOutput
@@ -8,6 +9,7 @@ import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
 class JSONSchemaTest {
     @Test
+    @Disabled("This is just a POC. wait until we have developed our schema before re-enabling it")
     fun `converts object to schema`() {
         expectThat(StructuredOutput::class.toJsonSchema()).isEqualToJson(
             """
