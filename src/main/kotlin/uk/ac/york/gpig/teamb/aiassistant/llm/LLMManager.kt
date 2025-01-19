@@ -11,6 +11,9 @@ import uk.ac.york.gpig.teamb.aiassistant.llm.client.StructuredOutput
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Issue
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
+// Model version that supports the "structured output" feature
+const val CHATGPT_VERSION = "gpt-4o-2024-08-06"
+
 /**
  * Handles interactions with the OpenAI API
  * */
@@ -30,7 +33,7 @@ class LLMManager(
         val rawJson =
             client.performStructuredOutputQuery(
                 OpenAIStructuredRequestData(
-                    model = "gpt-4o-2024-08-06",
+                    model = CHATGPT_VERSION,
                     messages =
                         listOf(
                             OpenAIMessage(
@@ -61,7 +64,7 @@ class LLMManager(
                         ),
                     responseFormat = StructuredOutput::class.toJsonSchema(),
                 ),
-            )
+            ) ?: throw Exception("Could not parse LLM output. Check the prompt or try again")
         return Gson().fromJson(rawJson, StructuredOutput::class.java)
     }
 }
