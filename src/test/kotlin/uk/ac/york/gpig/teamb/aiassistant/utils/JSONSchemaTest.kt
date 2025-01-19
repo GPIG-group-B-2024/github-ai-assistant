@@ -2,7 +2,7 @@ package uk.ac.york.gpig.teamb.aiassistant.utils
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import uk.ac.york.gpig.teamb.aiassistant.llm.StructuredOutput
+import uk.ac.york.gpig.teamb.aiassistant.llm.client.StructuredOutput
 import uk.ac.york.gpig.teamb.aiassistant.testutils.assertions.JsonAssertions.Companion.isEqualToJson
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
