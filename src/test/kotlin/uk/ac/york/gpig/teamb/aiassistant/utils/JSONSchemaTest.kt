@@ -1,48 +1,109 @@
 package uk.ac.york.gpig.teamb.aiassistant.utils
 
-import org.junit.jupiter.api.Disabled
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import uk.ac.york.gpig.teamb.aiassistant.llm.client.StructuredOutput
 import uk.ac.york.gpig.teamb.aiassistant.testutils.assertions.JsonAssertions.Companion.isEqualToJson
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
 class JSONSchemaTest {
     @Test
-    @Disabled("This is just a POC. wait until we have developed our schema before re-enabling it")
-    fun `converts object to schema`() {
-        expectThat(StructuredOutput::class.toJsonSchema()).isEqualToJson(
+    fun `smoke test`() {
+        data class SimpleClass(
+            val a: String,
+            val b: Int,
+            val c: Boolean,
+        )
+        expectThat(SimpleClass::class.toJsonSchema()).isEqualToJson(
+            """
+            {
+                "type":"object",
+                "additionalProperties":false,
+                "properties":{
+                    "a":{"type":"string"},
+                    "b":{"type":"integer"},
+                    "c":{"type":"boolean"}
+                    }
+            }
+        """.replace("\\s".toRegex(), ""),
+        )
+    }
+
+    @Test
+    fun `can handle nested objects`() {
+        data class Nested(val d: Boolean)
+
+        data class NestedObject(
+            val a: String,
+            val b: Int,
+            val c: Nested,
+        )
+
+        expectThat(NestedObject::class.toJsonSchema()).isEqualToJson(
             """
             {
               "type": "object",
               "additionalProperties": false,
-              "id": "urn:jsonschema:uk:ac:york:gpig:teamb:aiassistant:llm:StructuredOutput",
               "properties": {
-                "name": {
+                "a": {
                   "type": "string"
                 },
-                "age": {
+                "b": {
                   "type": "integer"
                 },
-                "cars": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "id": "urn:jsonschema:uk:ac:york:gpig:teamb:aiassistant:llm:StructuredOutput:Car",
-                    "properties": {
-                      "make": {
-                        "type": "string"
-                      },
-                      "model": {
-                        "type": "string"
-                      }
+                "c": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "properties": {
+                    "d": {
+                      "type": "boolean"
                     }
                   }
                 }
               }
             }
-        """.replace("[\\s]".toRegex(), ""),
+        """.replace("\\s".toRegex(), ""),
+        )
+    }
+
+    @Test
+    @DisplayName("can handle nested arrays") // test breaks if function name contains spaces
+    fun handlesArrays()  {
+        data class Nested(val d: Boolean)
+
+        data class NestedArray(
+            val a: String,
+            val b: Int,
+            val c: List<Nested>,
+        )
+
+        expectThat(NestedArray::class.toJsonSchema()).isEqualToJson(
+            """
+            {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "a": {
+                    "type": "string"
+                  },
+                  "b": {
+                    "type": "integer"
+                  },
+                  "c": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "properties": {
+                        "d": {
+                          "type": "boolean"
+                        }
+                      }
+                    }
+                  }
+                }
+            }
+        """.replace("\\s".toRegex(), ""),
         )
     }
 }
