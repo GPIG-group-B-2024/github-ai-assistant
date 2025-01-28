@@ -1,5 +1,7 @@
 package uk.ac.york.gpig.teamb.aiassistant.llm.client
 
+import com.fasterxml.jackson.databind.JsonNode
+
 data class OpenAIMessage(
     val role: Role,
     val message: String,
@@ -19,7 +21,7 @@ sealed class OpenAIRequestData {
 }
 
 data class OpenAIStructuredRequestData(
-    val responseFormat: String,
+    val responseFormat: JsonNode,
     override val model: String,
     override val messages: List<OpenAIMessage>,
 ) : OpenAIRequestData()

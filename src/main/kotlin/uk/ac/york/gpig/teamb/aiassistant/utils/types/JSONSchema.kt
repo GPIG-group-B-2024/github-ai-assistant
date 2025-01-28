@@ -1,5 +1,6 @@
 package uk.ac.york.gpig.teamb.aiassistant.utils.types
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchema
 import com.fasterxml.jackson.module.jsonSchema.jakarta.JsonSchemaGenerator
@@ -8,11 +9,11 @@ import kotlin.reflect.KClass
 /**
  * Generate a JSON schema from a given Kotlin type
  * */
-fun <T : Any> KClass<T>.toJsonSchema(): String {
+fun <T : Any> KClass<T>.toJsonSchema(): JsonNode {
     val mapper = ObjectMapper()
     val schemaGenerator = JsonSchemaGenerator(mapper)
     val schema = schemaGenerator.generateSchema(this.java).cleanupForStructuredOutput()
-    return mapper.writeValueAsString(schema)
+    return mapper.valueToTree<JsonNode>(schema)
 }
 
 /**
