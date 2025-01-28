@@ -68,7 +68,7 @@ class JSONSchemaTest {
 
     @Test
     @DisplayName("can handle nested arrays") // test breaks if function name contains spaces
-    fun handlesArrays()  {
+    fun handlesArrays() {
         data class Nested(val d: Boolean)
 
         data class NestedArray(
