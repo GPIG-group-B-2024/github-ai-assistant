@@ -3,7 +3,7 @@ package uk.ac.york.gpig.teamb.aiassistant.utils
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
-import uk.ac.york.gpig.teamb.aiassistant.testutils.assertions.JsonAssertions.Companion.isEqualToJson
+import uk.ac.york.gpig.teamb.aiassistant.testutils.assertions.isEqualToJson
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
 class JSONSchemaTest {

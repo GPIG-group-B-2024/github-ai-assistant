@@ -5,14 +5,10 @@ import strikt.api.Assertion.Builder
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
 
-class JsonAssertions {
-    companion object {
-        @Suppress("UNCHECKED_CAST")
-        fun <T : JsonNode> Builder<T>.isEqualToJson(jsonString: String): Builder<T> {
-            val mapper = ObjectMapper()
-            val first: JsonNode = this.subject
-            val second: JsonNode = mapper.readTree(jsonString)
-            return expectThat(first).isEqualTo(second) as Builder<T>
-        }
-    }
+@Suppress("UNCHECKED_CAST")
+fun <T : JsonNode> Builder<T>.isEqualToJson(jsonString: String): Builder<T> {
+    val mapper = ObjectMapper()
+    val first: JsonNode = this.subject
+    val second: JsonNode = mapper.readTree(jsonString)
+    return expectThat(first).isEqualTo(second) as Builder<T>
 }
