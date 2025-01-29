@@ -55,6 +55,7 @@ class OpenAIClientTest {
                         "responseFormat": {
                           "type": "object",
                           "additionalProperties": false,
+                          "required": ["make", "model", "horsePower"],
                           "properties": {
                             "make": {
                               "type": "string"

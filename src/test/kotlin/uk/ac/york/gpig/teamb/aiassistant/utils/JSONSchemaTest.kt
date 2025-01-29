@@ -23,7 +23,8 @@ class JSONSchemaTest {
                     "a":{"type":"string"},
                     "b":{"type":"integer"},
                     "c":{"type":"boolean"}
-                    }
+                    },
+                "required": ["a", "b", "c"]
             }
         """.replace("\\s".toRegex(), ""),
         )
@@ -44,6 +45,7 @@ class JSONSchemaTest {
             {
               "type": "object",
               "additionalProperties": false,
+              "required" : ["a", "b", "c"],
               "properties": {
                 "a": {
                   "type": "string"
@@ -53,6 +55,7 @@ class JSONSchemaTest {
                 },
                 "c": {
                   "type": "object",
+                  "required": ["d"],
                   "additionalProperties": false,
                   "properties": {
                     "d": {
@@ -82,6 +85,7 @@ class JSONSchemaTest {
             {
                 "type": "object",
                 "additionalProperties": false,
+                "required": ["a", "b", "c"],
                 "properties": {
                   "a": {
                     "type": "string"
@@ -93,6 +97,7 @@ class JSONSchemaTest {
                     "type": "array",
                     "items": {
                       "type": "object",
+                      "required": ["d"],
                       "additionalProperties": false,
                       "properties": {
                         "d": {
