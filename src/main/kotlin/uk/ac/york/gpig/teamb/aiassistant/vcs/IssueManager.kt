@@ -2,8 +2,10 @@ package uk.ac.york.gpig.teamb.aiassistant.vcs
 
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import uk.ac.york.gpig.teamb.aiassistant.llm.client.LLMPullRequestData
 import uk.ac.york.gpig.teamb.aiassistant.utils.filesystem.withTempDir
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload
+import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Issue
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.git.GitFacade
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.github.GitHubFacade
 
@@ -63,5 +65,23 @@ class IssueManager(
         } else {
             logger.info("Latest comment is from myself, aborting...")
         }
+    }
+
+    internal fun submitSolution(
+        repoName: String,
+        issue: Issue,
+        solution: LLMPullRequestData,
+    )  {
+
+        solution.updatedFiles.forEach {
+            TODO()
+        }
+
+        gitHubFacade.createPullRequest(
+            repoName = repoName,
+            featureBranch = "${issue.number}-${issue.title.lowercase().replace(" ", "-")}",
+            title = solution.pullRequestTitle,
+            body = solution.pullRequestBody + "closes ${issue.number}",
+        )
     }
 }

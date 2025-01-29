@@ -1,6 +1,6 @@
 package uk.ac.york.gpig.teamb.aiassistant.llm.client
 
-data class StructuredOutput(
+data class LLMPullRequestData(
     val pullRequestBody: String,
     val pullRequestTitle: String,
     val updatedFiles: List<UpdatedFile>,

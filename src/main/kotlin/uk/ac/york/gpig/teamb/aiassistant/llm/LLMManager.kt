@@ -7,7 +7,7 @@ import uk.ac.york.gpig.teamb.aiassistant.database.C4Manager
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.OpenAIClient
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.OpenAIMessage
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.OpenAIStructuredRequestData
-import uk.ac.york.gpig.teamb.aiassistant.llm.client.StructuredOutput
+import uk.ac.york.gpig.teamb.aiassistant.llm.client.LLMPullRequestData
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Issue
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.toJsonSchema
 
@@ -27,7 +27,7 @@ class LLMManager(
     fun produceIssueSolution(
         repoName: String,
         issue: Issue,
-    ): StructuredOutput {
+    ): LLMPullRequestData {
         val c4Data = c4Manager.gitRepoToStructurizrDsl(repoName) // TODO: incorporate this into the prompt
 
         val rawJson =
@@ -62,9 +62,9 @@ class LLMManager(
                                 // ^ TODO: same here
                             ),
                         ),
-                    responseFormat = StructuredOutput::class.toJsonSchema(),
+                    responseFormat = LLMPullRequestData::class.toJsonSchema(),
                 ),
             ) ?: throw Exception("Could not parse LLM output. Check the prompt or try again")
-        return Gson().fromJson(rawJson, StructuredOutput::class.java)
+        return Gson().fromJson(rawJson, LLMPullRequestData::class.java)
     }
 }
