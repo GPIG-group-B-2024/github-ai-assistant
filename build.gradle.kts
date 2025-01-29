@@ -97,7 +97,7 @@ val container =
 // apply migrations
 flyway {
   logging.captureStandardOutput(LogLevel.INFO)
-  url = container?.getJdbcUrl()
+  url = container?.jdbcUrl
   user = container?.username
   password = container?.password
   schemas = arrayOf("github_ai_assistant")
@@ -112,7 +112,7 @@ jooq {
         logging = Logging.WARN
         jdbc.apply {
           driver = "org.postgresql.Driver"
-          url = container?.getJdbcUrl()
+          url = container?.jdbcUrl
           user = container?.username
           password = container?.password
         }
