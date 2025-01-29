@@ -71,8 +71,7 @@ class IssueManager(
         repoName: String,
         issue: Issue,
         solution: LLMPullRequestData,
-    )  {
-
+    ) {
         solution.updatedFiles.forEach {
             TODO()
         }
