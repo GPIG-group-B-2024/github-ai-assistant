@@ -48,8 +48,8 @@ internal fun JsonSchema.cleanupForStructuredOutput(): JsonSchema =
  *
  * Because the jackson schema generator module doesn't generate v4 compliant schemas, this is a workaround.
  *
- * This function will simply add all property names to a "required" array field as described in their docs
- * (see https://platform.openai.com/docs/guides/structured-outputs#all-fields-must-be-required)
+ * This function will simply add all property names to a "required" array field as described in their
+ * [docs](https://platform.openai.com/docs/guides/structured-outputs#all-fields-must-be-required)
  * */
 internal fun JsonNode.markPropertiesAsRequired(mapper: ObjectMapper): JsonNode =
     this.also {
