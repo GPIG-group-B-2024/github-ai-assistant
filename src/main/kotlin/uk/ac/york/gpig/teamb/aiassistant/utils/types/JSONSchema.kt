@@ -28,14 +28,14 @@ fun <T : Any> KClass<T>.toJsonSchema(): JsonNode {
 internal fun JsonSchema.cleanupForStructuredOutput(): JsonSchema =
     this.also {
         when {
-            this.isObjectSchema -> {
-                this.id = null // remove the id field (not needed)
-                this.asObjectSchema().rejectAdditionalProperties()
+            it.isObjectSchema -> {
+                it.id = null // remove the id field (not needed)
+                it.asObjectSchema().rejectAdditionalProperties()
                 // ^ set `additionalProperties` to false (to prevent chatGPT from putting random fields into its answer)
-                this.asObjectSchema().properties.forEach { (_, childSchema) -> childSchema.cleanupForStructuredOutput() }
+                it.asObjectSchema().properties.forEach { (_, childSchema) -> childSchema.cleanupForStructuredOutput() }
                 // ^ visit nested properties and check if any of them are objects/arrays too
             }
-            this.isArraySchema -> this.asArraySchema().items.asSingleItems().schema.cleanupForStructuredOutput()
+            it.isArraySchema -> it.asArraySchema().items.asSingleItems().schema.cleanupForStructuredOutput()
             // ^ we found a nested array schema, check if its items are object schemas and if so, make the changes
             // NOTE: assumes that arrays can only contain data of one type (fine for strongly typed languages)
             else -> Unit
@@ -53,16 +53,16 @@ internal fun JsonSchema.cleanupForStructuredOutput(): JsonSchema =
  * */
 internal fun JsonNode.markPropertiesAsRequired(mapper: ObjectMapper): JsonNode =
     this.also {
-        when (this.get("type").textValue()) { // this "type" field is guaranteed to be there as the node represents a JSON schema
+        when (it.get("type").textValue()) { // this "type" field is guaranteed to be there as the node represents a JSON schema
             "object" -> {
                 // we are looking at an object schema
-                val propertyNames = mapper.valueToTree<JsonNode>(this.get("properties").properties().map { it.key })
-                (this as ObjectNode).putIfAbsent("required", propertyNames)
+                val propertyNames = mapper.valueToTree<JsonNode>(it.get("properties").properties().map { it.key })
+                (it as ObjectNode).putIfAbsent("required", propertyNames)
                 // ^ find all property names, convert them to a JSON array and add to the node
-                this.get("properties").properties().forEach { it.value.markPropertiesAsRequired(mapper) }
+                it.get("properties").properties().forEach { it.value.markPropertiesAsRequired(mapper) }
                 // ^ check if any nested properties need the same treatment (i.e. check if there are any nested object schemas)
             }
-            "array" -> this.get("items").markPropertiesAsRequired(mapper)
+            "array" -> it.get("items").markPropertiesAsRequired(mapper)
             // ^ check if the type of the array item is an object and add the "required" field if so
             else -> Unit // this is a primitive schema, stop
         }
