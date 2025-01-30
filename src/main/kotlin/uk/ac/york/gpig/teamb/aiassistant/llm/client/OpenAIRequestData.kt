@@ -1,5 +1,6 @@
 package uk.ac.york.gpig.teamb.aiassistant.llm.client
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.JsonNode
 
 data class OpenAIMessage(
@@ -10,7 +11,10 @@ data class OpenAIMessage(
      * What kind of prompt this message is: system vs user.
      * */
     enum class Role {
+        @JsonProperty("user")
         USER,
+
+        @JsonProperty("system")
         SYSTEM,
     }
 }

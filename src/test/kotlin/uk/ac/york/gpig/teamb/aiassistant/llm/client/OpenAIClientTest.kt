@@ -71,11 +71,11 @@ class OpenAIClientTest {
                         "model": "latest-chatgpt",
                         "messages": [
                           {
-                            "role": "SYSTEM",
+                            "role": "system",
                             "message": "You are a car inventor. When prompted, create a new car."
                           },
                           {
-                            "role": "USER",
+                            "role": "user",
                             "message": "Create a powerful car with a confidence-inspiring model name. \nUse a well-respected manufacturer as the make."
                           }
                         ]
