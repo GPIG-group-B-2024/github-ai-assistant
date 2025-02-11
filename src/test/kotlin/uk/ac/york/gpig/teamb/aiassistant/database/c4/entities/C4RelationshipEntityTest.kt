@@ -1,9 +1,8 @@
-package uk.ac.york.gpig.teamb.aiassistant.database.entities
+package uk.ac.york.gpig.teamb.aiassistant.database.c4.entities
 
 import org.junit.jupiter.api.Test
 import strikt.api.expectThat
 import strikt.assertions.isEqualTo
-import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4RelationshipEntity
 import java.util.UUID
 
 class C4RelationshipEntityTest {

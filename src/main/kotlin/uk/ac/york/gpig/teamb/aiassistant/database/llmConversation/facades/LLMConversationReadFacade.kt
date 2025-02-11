@@ -8,13 +8,15 @@ import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.entities.LLMMe
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.CONVERSATION_MESSAGE
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.LLM_CONVERSATION
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.LLM_MESSAGE
-import java.time.OffsetDateTime
 import java.util.UUID
 
 @Repository
 class LLMConversationReadFacade(
     @Autowired val ctx: DSLContext,
 ) {
+    /**
+     * List all messages in a given conversation in chronological order
+     * */
     fun listConversationMessages(conversationId: UUID): List<LLMMessageEntity> =
         ctx.select(
             LLM_MESSAGE.ID,
@@ -29,10 +31,13 @@ class LLMConversationReadFacade(
             .orderBy(LLM_MESSAGE.CREATED_AT)
             .fetch(LLMMessageEntity::fromJooq)
 
+    /**
+     * Get a conversation associated with a given issue in a given repository.
+     * NOTE: assumes we only have one conversation per issue.
+     * */
     fun fetchConversation(
         repoId: UUID,
         issueId: Int,
-        createdAt: OffsetDateTime,
     ): LLMConversationEntity? =
         ctx.selectFrom(LLM_CONVERSATION)
             .where(
@@ -40,9 +45,19 @@ class LLMConversationReadFacade(
                     repoId,
                 )
                     .and(
-                        LLM_CONVERSATION.ISSUE_ID.eq(issueId)
-                            .and(LLM_CONVERSATION.CREATED_AT.eq(createdAt)),
+                        LLM_CONVERSATION.ISSUE_ID.eq(issueId),
                     ),
             )
             .fetchOne(LLMConversationEntity::fromJooq)
+
+    /**
+     * Check if we already have a conversation for this issue in this repository.
+     *
+     * NOTE: this will probably need to be refactored if we plan to have multiple conversations per issue.
+     * Will have to discuss implementations in a team meeting if this is the case.
+     * */
+    fun checkConversationExists(
+        repoId: UUID,
+        issueId: Int,
+    ) = ctx.fetchExists(LLM_CONVERSATION.where(LLM_CONVERSATION.REPO_ID.eq(repoId).and(LLM_CONVERSATION.ISSUE_ID.eq(issueId))))
 }

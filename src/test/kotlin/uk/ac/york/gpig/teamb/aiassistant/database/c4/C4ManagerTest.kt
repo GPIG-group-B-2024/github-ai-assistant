@@ -1,4 +1,4 @@
-package uk.ac.york.gpig.teamb.aiassistant.database
+package uk.ac.york.gpig.teamb.aiassistant.database.c4
 
 import org.jooq.DSLContext
 import org.junit.jupiter.api.DisplayName
@@ -11,7 +11,6 @@ import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isTrue
-import uk.ac.york.gpig.teamb.aiassistant.database.c4.C4Manager
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.exceptions.NotFoundException.NotFoundByNameException
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.GITHUB_REPOSITORY
