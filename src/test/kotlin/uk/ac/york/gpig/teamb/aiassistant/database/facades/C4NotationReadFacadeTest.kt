@@ -14,6 +14,7 @@ import strikt.assertions.isFalse
 import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.facades.C4NotationReadFacade
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import uk.ac.york.gpig.teamb.aiassistant.testutils.AiAssistantTest
 import uk.ac.york.gpig.teamb.aiassistant.testutils.databuilders.GitRepoBuilder.Companion.gitRepo

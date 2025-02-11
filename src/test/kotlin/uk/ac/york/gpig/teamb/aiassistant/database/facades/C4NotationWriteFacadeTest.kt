@@ -11,9 +11,10 @@ import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
-import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4ElementEntity
-import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4RelationshipEntity
-import uk.ac.york.gpig.teamb.aiassistant.database.entities.C4WorkspaceEntity
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4ElementEntity
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4RelationshipEntity
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4WorkspaceEntity
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.facades.C4NotationWriteFacade
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.GITHUB_REPOSITORY
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.MEMBER
