@@ -23,7 +23,7 @@ import java.util.UUID
 import kotlin.random.Random
 
 @AiAssistantTest
-class LLMMessageReadFacadeTest {
+class LLMConversationReadFacadeTest {
     @Autowired
     private lateinit var sut: LLMConversationReadFacade
 
@@ -64,7 +64,7 @@ class LLMMessageReadFacadeTest {
         }
 
         @Test
-        fun `handles empty conversation`()  {
+        fun `handles empty conversation`() {
             val conversationId = UUID.randomUUID()
             conversation {
                 this.id = conversationId
@@ -78,7 +78,7 @@ class LLMMessageReadFacadeTest {
     @DisplayName("checkConversationExists test")
     inner class CheckConversationExistsTest {
         @Test
-        fun `reports true for existing conversation`()  {
+        fun `reports true for existing conversation`() {
             val conversationId = UUID.randomUUID()
             val issueId = 10
             val repoId = UUID.randomUUID()
@@ -94,7 +94,7 @@ class LLMMessageReadFacadeTest {
         }
 
         @Test
-        fun `reports false for non-existing conversation`()  {
+        fun `reports false for non-existing conversation`() {
             val conversationId = UUID.randomUUID()
             val repoId = UUID.randomUUID()
             conversation {
@@ -113,7 +113,7 @@ class LLMMessageReadFacadeTest {
     @DisplayName("fetchConversation test")
     inner class FetchConversationTest {
         @Test
-        fun `fetches existing conversation`()  {
+        fun `fetches existing conversation`() {
             val conversationId = UUID.randomUUID()
             val issueId = 10
             val repoId = UUID.randomUUID()
@@ -135,7 +135,7 @@ class LLMMessageReadFacadeTest {
         }
 
         @Test
-        fun `returns null when conversation not found`()  {
+        fun `returns null when conversation not found`() {
             val conversationId = UUID.randomUUID()
             val repoId = UUID.randomUUID()
             conversation {
