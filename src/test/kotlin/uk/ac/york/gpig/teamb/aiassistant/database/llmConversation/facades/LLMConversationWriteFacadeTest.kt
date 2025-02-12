@@ -55,7 +55,7 @@ class LLMConversationWriteFacadeTest {
     @Nested
     inner class StoreMessageTest {
         @Test
-        fun `stores a single message`()  {
+        fun `stores a single message`() {
             val messageId = UUID.randomUUID()
             val messageContents = "This is my first message!"
             val beforeCreationTimestamp = OffsetDateTime.now()
@@ -75,7 +75,7 @@ class LLMConversationWriteFacadeTest {
     @DisplayName("tests for linking a message to a conversation")
     inner class LinkMessageToConversationTest {
         @Test
-        fun `links a message to an existing conversation`()  {
+        fun `links a message to an existing conversation`() {
             val messageId = UUID.randomUUID()
             val conversationId = UUID.randomUUID()
             conversation {
