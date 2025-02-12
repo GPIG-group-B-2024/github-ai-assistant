@@ -1,4 +1,4 @@
-package uk.ac.york.gpig.teamb.aiassistant.database.c4.exceptions
+package uk.ac.york.gpig.teamb.aiassistant.database.exceptions
 
 import java.util.UUID
 

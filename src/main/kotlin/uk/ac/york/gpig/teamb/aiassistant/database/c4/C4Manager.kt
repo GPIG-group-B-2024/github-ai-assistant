@@ -12,9 +12,9 @@ import uk.ac.york.gpig.teamb.aiassistant.database.c4.conversions.toStructurizrSt
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4ElementEntity
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4RelationshipEntity
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4WorkspaceEntity
-import uk.ac.york.gpig.teamb.aiassistant.database.c4.exceptions.NotFoundException
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.facades.C4NotationReadFacade
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.facades.C4NotationWriteFacade
+import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.NotFoundException
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import java.util.UUID
 

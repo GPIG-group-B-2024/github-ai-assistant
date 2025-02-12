@@ -34,19 +34,35 @@ class C4NotationReadFacadeTest {
     @DisplayName("checkRepositoryExists()")
     inner class CheckRepositoryTests {
         @Test
-        fun `returns false when repository does not exist`() {
+        fun `returns false when repository with given name does not exist`() {
             val unknownRepoName = "some-dev/unknown-repo"
             expectThat(sut.checkRepositoryExists(unknownRepoName)).isFalse()
         }
 
         @Test
-        fun `returns true when repository exists`() {
+        fun `returns true when repository with given name exists`() {
             val repoName = "my-cool-repo"
             gitRepo {
                 this.fullName = repoName
             }.create(ctx)
 
             expectThat(sut.checkRepositoryExists(repoName)).isTrue()
+        }
+
+        @Test
+        fun `returns false when repository with given ID does not exist`() {
+            val unknownRepoId = UUID.randomUUID()
+            expectThat(sut.checkRepositoryExists(unknownRepoId)).isFalse()
+        }
+
+        @Test
+        fun `returns true when repository with given ID exists`() {
+            val repoId = UUID.randomUUID()
+            gitRepo {
+                this.id = repoId
+            }.create(ctx)
+
+            expectThat(sut.checkRepositoryExists(repoId)).isTrue()
         }
     }
 
