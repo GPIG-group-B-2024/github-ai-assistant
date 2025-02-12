@@ -74,7 +74,7 @@ class LLMConversationManagerTest {
     }
 
     @Test
-    fun `throws for unknown repo`()  {
+    fun `throws for unknown repo`() {
         gitRepo {
             this.id = UUID.randomUUID()
         }.create(ctx)
@@ -87,7 +87,7 @@ class LLMConversationManagerTest {
     }
 
     @Test
-    fun `throws when conversation already exists`()  {
+    fun `throws when conversation already exists`() {
         val repoId = UUID.randomUUID()
         val issueId = 10
         conversation {
