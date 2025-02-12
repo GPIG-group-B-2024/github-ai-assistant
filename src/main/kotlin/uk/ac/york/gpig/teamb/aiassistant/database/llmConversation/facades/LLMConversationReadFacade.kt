@@ -12,7 +12,7 @@ import java.util.UUID
 
 @Repository
 class LLMConversationReadFacade(
-    @Autowired val ctx: DSLContext,
+    @Autowired private val ctx: DSLContext,
 ) {
     /**
      * List all messages in a given conversation in chronological order

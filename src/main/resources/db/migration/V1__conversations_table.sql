@@ -6,7 +6,7 @@ CREATE TABLE llm_conversation
     created_at timestamptz
 );
 
-CREATE TYPE llm_message_role AS ENUM ('system', 'user', 'assistant');
+CREATE TYPE llm_message_role AS ENUM ('SYSTEM', 'USER', 'ASSISTANT');
 
 CREATE TABLE llm_message
 (

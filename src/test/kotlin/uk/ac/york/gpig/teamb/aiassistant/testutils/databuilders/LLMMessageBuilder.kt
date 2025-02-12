@@ -8,7 +8,7 @@ import java.util.UUID
 
 class LLMMessageBuilder : TestDataWithIdBuilder<LLMMessageBuilder, UUID?>() {
     override var id: UUID? = UUID.randomUUID()
-    var role: LlmMessageRole = LlmMessageRole.user
+    var role: LlmMessageRole = LlmMessageRole.USER
     var content: String = "Some cool message"
     var createdAt: OffsetDateTime = OffsetDateTime.now()
 
