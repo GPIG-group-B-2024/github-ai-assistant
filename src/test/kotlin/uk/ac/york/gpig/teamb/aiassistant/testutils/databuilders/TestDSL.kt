@@ -21,25 +21,7 @@ fun <T : Record, TBuilder : TestDataBuilder<TBuilder>> TBuilder.create(
     ctx: DSLContext,
     table: Table<T>,
     existenceCheck: () -> Condition,
-    insertAction: () -> Int,
-): TBuilder {
-    val record = ctx.selectFrom(table).where(existenceCheck()).fetchOne()
-    if (record != null) {
-        return this
-    }
-    val insertResult = insertAction()
-    if (insertResult != 1) {
-        throw Exception("Error building test data")
-    }
-    Thread.sleep(0, 10000)
-    return this
-}
-
-fun <T : Record, TBuilder : TestDataBuilder<TBuilder>> TBuilder.create(
-    ctx: DSLContext,
-    table: Table<T>,
-    existenceCheck: () -> Condition,
-    expectedInsertCount: Int,
+    expectedInsertCount: Int = 1,
     insertAction: () -> Int,
 ): TBuilder {
     val record = ctx.selectFrom(table).where(existenceCheck()).fetchOne()
@@ -59,4 +41,4 @@ fun <T : Record, TId, TBuilder : TestDataWithIdBuilder<TBuilder, TId>> TBuilder.
     table: Table<T>,
     idField: TableField<T, TId>,
     insertAction: () -> Int,
-): TBuilder = this.create(ctx, table, { idField.eq(this.id) }, insertAction)
+): TBuilder = this.create(ctx = ctx, table = table, existenceCheck = { idField.eq(this.id) }, insertAction = insertAction)
