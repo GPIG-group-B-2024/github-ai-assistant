@@ -51,15 +51,15 @@ class LLMConversationMessageBuilder : TestDataBuilder<LLMConversationMessageBuil
         ) {
             // create conversation
             val conversation = LLMConversationBuilder.conversation(conversationBuilder).create(ctx)
-            // create all the messages and get their ID's
-            val messageIds =
+            // create a message from each of the builders and prepare a SQL row linking each one to the conversation
+            val messageLinkRows =
                 messageBuilders.map {
-                    LLMMessageBuilder.message(it).create(ctx).id
+                    DSL.row(conversation.id, LLMMessageBuilder.message(it).create(ctx).id)
                 }
-            // create all links
+            // write links to db
             ctx.insertInto(CONVERSATION_MESSAGE)
                 .columns(CONVERSATION_MESSAGE.CONVERSATION_ID, CONVERSATION_MESSAGE.MESSAGE_ID)
-                .valuesOfRows(messageIds.map { DSL.row(conversation.id, it) })
+                .valuesOfRows(messageLinkRows)
                 .execute()
         }
 }
