@@ -12,9 +12,9 @@ import strikt.assertions.isEmpty
 import strikt.assertions.isEqualTo
 import strikt.assertions.isFalse
 import strikt.assertions.isNotEmpty
-import strikt.assertions.isNotNull
 import strikt.assertions.isNull
 import strikt.assertions.isTrue
+import strikt.assertions.withNotNull
 import uk.ac.york.gpig.teamb.aiassistant.enums.LlmMessageRole
 import uk.ac.york.gpig.teamb.aiassistant.testutils.AiAssistantTest
 import uk.ac.york.gpig.teamb.aiassistant.testutils.databuilders.LLMConversationBuilder.Companion.conversation
@@ -127,7 +127,7 @@ class LLMConversationReadFacadeTest {
 
             val result = sut.fetchConversation(repoId, issueId)
 
-            expectThat(result).isNotNull().and {
+            expectThat(result).withNotNull {
                 get { this.id }.isEqualTo(conversationId)
                 get { this.issueId }.isEqualTo(issueId)
                 get { this.repoId }.isEqualTo(repoId)
