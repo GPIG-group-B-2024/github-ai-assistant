@@ -1,4 +1,5 @@
 import org.jooq.meta.jaxb.Logging
+import org.springframework.boot.gradle.tasks.run.BootRun
 import org.testcontainers.containers.PostgreSQLContainer
 
 plugins {
@@ -34,6 +35,7 @@ dependencyManagement {
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r") // git API
   implementation("org.kohsuke:github-api:1.326") // GitHub API
@@ -145,4 +147,14 @@ tasks.named("generateJooq").configure {
   dependsOn(tasks.named("flywayMigrate"))
   val taskNames = project.gradle.startParameter.taskNames
   onlyIf { taskNames == listOf("generateJooq") }
+}
+
+tasks.register<BootRun>("bootRunLocal") {
+  group = "application"
+  description = "Run with `application-local.yml` config applied"
+  classpath = sourceSets["main"].runtimeClasspath
+  mainClass.set(
+      "uk.ac.york.gpig.teamb.aiassistant.AiAssistantApplicationKt") // Ensure this matches your
+  // package structure
+  systemProperty("spring.profiles.active", "local")
 }

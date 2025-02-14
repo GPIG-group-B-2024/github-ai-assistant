@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+<h1>Admin panel</h1>
+
+<h2 th:text="|Conversations (${conversationCount} entries)|"></h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>Github repo</th>
+        <th> Github issue ID</th>
+        <th>Created at</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${data}">
+        <td th:text="${item.id}"></td>
+        <td th:text="${item.repoId}"></td>
+        <td th:text="${item.issueId}"></td>
+        <td th:text="${item.createdAt}"></td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

@@ -50,6 +50,8 @@ class LLMConversationReadFacade(
             )
             .fetchOne(LLMConversationEntity::fromJooq)
 
+    fun fetchConversations() = ctx.selectFrom(LLM_CONVERSATION).fetch(LLMConversationEntity::fromJooq)
+
     /**
      * Check if we already have a conversation for this issue in this repository.
      *

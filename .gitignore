@@ -40,3 +40,4 @@ out/
 
 ### key files ###
 **/**.pem
+/src/main/resources/application-local.yml
