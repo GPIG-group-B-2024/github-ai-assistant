@@ -27,7 +27,7 @@ class ConversationAdminController(
     fun conversationPage(
         model: Model,
         @PathVariable conversationId: UUID,
-    ): String  {
+    ): String {
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.addAttribute("conversationId", conversationId)
         model.addAttribute("messageCount", messages.size)
