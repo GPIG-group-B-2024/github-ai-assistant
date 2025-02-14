@@ -53,4 +53,9 @@ class LLMConversationManager(
     }
 
     fun fetchConversations() = llmConversationReadFacade.fetchConversations().also { logger.info("Found ${it.size} entries") }
+
+    fun fetchConversationMessages(conversationId: UUID) =
+        llmConversationReadFacade.listConversationMessages(conversationId).also {
+            logger.info("Found ${it.size} messages in conversation $conversationId")
+        }
 }
