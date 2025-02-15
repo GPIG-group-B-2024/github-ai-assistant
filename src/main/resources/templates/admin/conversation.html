@@ -58,9 +58,7 @@
             </td>
             <td>
               <details>
-                <summary
-                  th:text="|${#strings.abbreviate(item.contents, 50)}...|"
-                />
+                <summary th:text="${#strings.abbreviate(item.contents, 50)}" />
                 <p th:text="${item.contents}" />
               </details>
             </td>
