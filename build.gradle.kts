@@ -36,6 +36,7 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
   implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+  developmentOnly("org.springframework.boot:spring-boot-devtools")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r") // git API
   implementation("org.kohsuke:github-api:1.326") // GitHub API
@@ -82,6 +83,14 @@ spotless {
   kotlinGradle {
     target("*.gradle.kts") // default target for kotlinGradle
     ktfmt()
+  }
+  format("html") {
+    target("src/main/resources/**/*.html")
+    prettier().config(mapOf("parser" to "html"))
+  }
+  format("css") {
+    target("src/main/resources/**/*.css")
+    prettier().config(mapOf("parser" to "css"))
   }
 }
 

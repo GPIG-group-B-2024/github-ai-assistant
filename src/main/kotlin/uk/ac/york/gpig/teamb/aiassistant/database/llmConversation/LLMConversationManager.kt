@@ -52,7 +52,7 @@ class LLMConversationManager(
         logger.info("Stored new conversation with id $conversationId and first message with id $messageId")
     }
 
-    fun fetchConversations() = llmConversationReadFacade.fetchConversations().also { logger.info("Found ${it.size} entries") }
+    fun fetchConversations() = llmConversationReadFacade.fetchConversations().also { logger.info("Found ${it.size} conversations") }
 
     fun fetchConversationMessages(conversationId: UUID) =
         llmConversationReadFacade.listConversationMessages(conversationId).also {
