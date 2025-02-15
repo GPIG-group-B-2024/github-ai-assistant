@@ -151,8 +151,8 @@ tasks.named("generateJooq").configure {
 
 tasks.register<BootRun>("bootRunLocal") {
   group = "application"
-  description = "Run with `application-local.yml` config applied"
+  description = "Run with `application-dev.yml` config applied"
   classpath = sourceSets["main"].runtimeClasspath
   mainClass.set("uk.ac.york.gpig.teamb.aiassistant.AiAssistantApplicationKt")
-  systemProperty("spring.profiles.active", "local")
+  systemProperty("spring.profiles.active", "dev")
 }

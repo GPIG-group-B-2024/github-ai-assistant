@@ -1,24 +1,45 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>
+        Admin dashboard
+    </title>
+</head>
 <body>
-<h1>Admin panel</h1>
+<link rel="stylesheet" href="../../static/css/conversation.css" th:href="@{/css/conversation.css}">
 
-<h2 th:text="|Conversation ${conversationId} (${messageCount} messages)|"></h2>
+<h2>
+    Conversation <span class="convo-id" th:text="${conversationId}"/> (<span th:text="${messageCount}"/> messages)</h2>
 
 <table>
     <thead>
     <tr>
         <th>Role</th>
         <th>Content</th>
-        <th>Created at</th>
+        <th>Created</th>
     </tr>
     </thead>
     <tbody>
     <tr th:each="item : ${data}">
-
-        <td th:text="${item.role}"></td>
-        <td th:text="${item.contents}"></td>
-        <td th:text="${item.createdAt}"></td>
+        <td>
+            <div th:switch="${item.role.toString()}">
+                <div th:case="'USER'" class="user-role-badge" th:text="${item.role}"></div>
+                <div th:case="'SYSTEM'" class="system-role-badge" th:text="${item.role}"></div>
+                <div th:case="'ASSISTANT'" class="assistant-role-badge" th:text="${item.role}"></div>
+            </div>
+        </td>
+        <td>
+            <details>
+                <summary th:text="|${#strings.abbreviate(item.contents, 50)}...|"/>
+                <p th:text="${item.contents}"/>
+            </details>
+        </td>
+        <td>
+            <div
+                    class="created-badge"
+                    th:text="${#temporals.format(item.getCreatedAt(), 'dd MMMM yyyy HH:mm:ss')}"
+            />
+        </td>
     </tr>
     </tbody>
 </table>
