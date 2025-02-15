@@ -153,8 +153,6 @@ tasks.register<BootRun>("bootRunLocal") {
   group = "application"
   description = "Run with `application-local.yml` config applied"
   classpath = sourceSets["main"].runtimeClasspath
-  mainClass.set(
-      "uk.ac.york.gpig.teamb.aiassistant.AiAssistantApplicationKt") // Ensure this matches your
-  // package structure
+  mainClass.set("uk.ac.york.gpig.teamb.aiassistant.AiAssistantApplicationKt")
   systemProperty("spring.profiles.active", "local")
 }
