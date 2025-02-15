@@ -72,6 +72,7 @@ kotlin { compilerOptions { freeCompilerArgs.addAll("-Xjsr305=strict") } }
 tasks.withType<Test> { useJUnitPlatform() }
 
 // formatting
+fun resourcesOfType(type: String) = "src/main/resources/**/*.$type"
 
 spotless {
   kotlin {
@@ -85,11 +86,11 @@ spotless {
     ktfmt()
   }
   format("html") {
-    target("src/main/resources/**/*.html")
+    target(resourcesOfType("html"))
     prettier().config(mapOf("parser" to "html"))
   }
   format("css") {
-    target("src/main/resources/**/*.css")
+    target(resourcesOfType("css"))
     prettier().config(mapOf("parser" to "css"))
   }
 }
