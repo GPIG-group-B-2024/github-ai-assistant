@@ -114,6 +114,11 @@ tbody tr:hover {
   transition: background-color 0.2s ease;
 }
 
+details > p {
+  /* Keep formatting of the original message e.g. line breaks, indents, etc. */
+  white-space: pre-wrap;
+}
+
 details[open] > summary {
   /* Dim the summary when the message is open in full */
   opacity: 0.2;
