@@ -23,6 +23,9 @@ class ConversationAdminController(
         return "admin/index"
     }
 
+    @GetMapping
+    fun redirectToIndex() = "redirect:/admin/conversations"
+
     @GetMapping("/conversations/{conversationId}")
     fun conversationPage(
         model: Model,
