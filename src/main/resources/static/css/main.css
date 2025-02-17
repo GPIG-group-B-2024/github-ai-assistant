@@ -157,3 +157,8 @@ tbody tr:hover {
   white-space: pre-line;
   margin: 0;
 }
+
+.error-home-button-container {
+  width: 100%;
+  align-items: center;
+}
