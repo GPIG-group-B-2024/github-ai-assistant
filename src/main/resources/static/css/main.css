@@ -38,6 +38,7 @@ thead tr {
 }
 
 td {
+  overflow: hidden;
   align-content: center;
 }
 
@@ -114,12 +115,45 @@ tbody tr:hover {
   transition: background-color 0.2s ease;
 }
 
-details > p {
-  /* Keep formatting of the original message e.g. line breaks, indents, etc. */
-  white-space: pre-wrap;
+.message-contents-cell {
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
-details[open] > summary {
-  /* Dim the summary when the message is open in full */
-  opacity: 0.2;
+.expand-message-checkbox {
+  display: none;
+  width: fit-content;
+}
+
+.expand-message-checkbox + label {
+  cursor: pointer;
+  display: inline;
+  height: 1em;
+  position: absolute;
+  top: 1em;
+  left: 0;
+  margin-top: auto;
+  transform-origin: center;
+  transform: rotate(-90deg);
+  transition: transform 0.2s ease;
+}
+
+.expand-message-checkbox:checked + label {
+  transform: rotate(0deg);
+}
+
+.message-contents {
+  max-height: 3em;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  transition: max-height 0.5s ease-in-out;
+}
+
+.expand-message-checkbox:checked + label + .message-contents {
+  max-height: 50em;
+  overflow: scroll;
+  white-space: pre-line;
+  margin: 0;
 }
