@@ -29,7 +29,6 @@ import kotlin.io.encoding.Base64
 import kotlin.io.encoding.ExperimentalEncodingApi
 
 @AiAssistantTest
-@WireMockTest(httpPort = 3000)
 class GitHubFacadeTest {
     @SpykBean // spy instead of mock because we want some real methods to run
     private lateinit var sut: GitHubFacade
