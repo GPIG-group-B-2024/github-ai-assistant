@@ -57,7 +57,12 @@ class GitHubFacade {
         authenticateAndCheckoutRepo(repoName).let { repo ->
             paths.map { path ->
                 logger.info("Trying to read file $path of repo $repoName (ref: $ref)")
-                val fileContents = repo.getFileContent(path, ref).read().reader().use { it.readText() }
+                // bit of a mouthful - basically, get the text from the bytes returned by the API
+                val fileContents =
+                    repo.getFileContent(path, ref) // make request...
+                        .read() // get bytes...
+                        .reader() // create reader...
+                        .use { it.readText() } // get text and close the reader
                 logger.info("Success")
                 FileBlob(
                     path = path,
