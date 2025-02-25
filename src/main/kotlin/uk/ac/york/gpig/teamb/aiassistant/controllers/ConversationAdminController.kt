@@ -32,9 +32,11 @@ class ConversationAdminController(
         @PathVariable conversationId: UUID,
     ): String {
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
-        model.addAttribute("conversationId", conversationId)
-        model.addAttribute("messageCount", messages.size)
-        model.addAttribute("data", messages)
+        model.run {
+            addAttribute("conversationId", conversationId)
+            addAttribute("messageCount", messages.size)
+            addAttribute("data", messages)
+        }
         return "admin/conversation"
     }
 }
