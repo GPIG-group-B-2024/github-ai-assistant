@@ -18,8 +18,10 @@ class ConversationAdminController(
     @GetMapping("/conversations")
     fun index(model: Model): String {
         val conversations = llmConversationManager.fetchConversations()
-        model.addAttribute("conversationCount", conversations.size)
-        model.addAttribute("data", conversations)
+        model.run {
+            addAttribute("conversationCount", conversations.size)
+            addAttribute("data", conversations)
+        }
         return "admin/index"
     }
 
