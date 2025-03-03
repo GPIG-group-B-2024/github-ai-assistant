@@ -64,4 +64,20 @@ class IssueManager(
             logger.info("Latest comment is from myself, aborting...")
         }
     }
+
+    fun processChanges(){
+        //recieve response schema(???)
+
+        //check if branch exists - create new if not
+
+        //loop through changes - for each change:
+            //check type of change
+            //check file exists
+            //throw appropriate errors or
+            //perform action
+        
+        //push changes to branch
+
+        //create PR?
+    }
 }
