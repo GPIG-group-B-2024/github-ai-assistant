@@ -65,19 +65,41 @@ class IssueManager(
         }
     }
 
-    fun processChanges(){
-        //recieve response schema(???)
+    fun processChanges(changes: LLMPullRequestData){
 
-        //check if branch exists - create new if not
+        // check if branch exists, if not create branch
 
-        //loop through changes - for each change:
-            //check type of change
-            //check file exists
-            //throw appropriate errors or
-            //perform action
+        val fileTree = gitFacade.printTree(changes.gitPath, changes.branchName)
+
+        for (change: Change in changes) {
+            if (change.type == "modify") {
+                // if does not exists file not found error(?)
+                if (!fileTree.contains(change.filePath)){
+                    // throw error
+                    return
+                }
+                // if file exists overwrite contents
+            } else if(change.type == "create") {
+                // if exists invalid argument exception(?)
+                if (fileTree.contains(change.filePath)){
+                    // throw error
+                    return
+                }
+                // if file does not exist create new file
+            } else if(change.type == "delete") {
+                // if does not exist file not found error(?)
+                if (!fileTree.contains(change.filePath)){
+                    // throw error
+                    return
+                }
+                // if file exists delete
+            }
+        }
         
-        //push changes to branch
+        // push changes to branch
+        gitFacade.pushBranch(changes.gitPath, changes.branchName, "token") // TODO: get token
 
-        //create PR?
+        // create PR
+        gitHubFacade.createPullRequest()
     }
 }
