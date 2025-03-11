@@ -184,6 +184,7 @@ class LLMManagerTest {
             expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch()).hasSize(1).get { this.first() }.and {
                 get { this.issueId }.isEqualTo(1)
                 get { this.repoId }.isEqualTo(repoId)
+                get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
             }
             // check that there are 5 recorded messages (system prompt, 1st user, 1st response, 2nd user, 2nd response)
             expectThat(
