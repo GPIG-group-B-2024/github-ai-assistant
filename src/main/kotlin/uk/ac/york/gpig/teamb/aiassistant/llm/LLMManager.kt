@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.C4Manager
 import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.LLMConversationManager
+import uk.ac.york.gpig.teamb.aiassistant.enums.ConversationStatus
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.OpenAIClient
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.openAiSchema.request.OpenAIMessage
 import uk.ac.york.gpig.teamb.aiassistant.llm.client.openAiSchema.request.OpenAIStructuredRequestData
@@ -149,15 +150,18 @@ class LLMManager(
                         ),
                 ),
             )
-        // we have received the pull request data. Write the remaining message to the database and return the data.
+        // we have received the pull request data. Write the remaining message to the database, mark the conversation as complete and return the data.
+        transactionTemplate.execute {
+            conversationManager.addMessageToConversation(
+                conversationId,
+                OpenAIMessage(
+                    OpenAIMessage.Role.ASSISTANT,
+                    gson.toJson(pullRequestData),
+                ),
+            )
+            conversationManager.updateConversationStatus(conversationId, ConversationStatus.COMPLETED)
+        }
 
-        conversationManager.addMessageToConversation(
-            conversationId,
-            OpenAIMessage(
-                OpenAIMessage.Role.ASSISTANT,
-                gson.toJson(pullRequestData),
-            ),
-        )
         return pullRequestData
     }
 }
