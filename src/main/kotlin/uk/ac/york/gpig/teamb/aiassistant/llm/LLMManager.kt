@@ -21,7 +21,7 @@ import uk.ac.york.gpig.teamb.aiassistant.vcs.VCSManager
  * */
 @Service
 class LLMManager(
-    @Value("\${app_settings.chatgpt_version:gpt-4o-2024-08-06")
+    @Value("\${app_settings.chatgpt_version:gpt-4o-2024-08-06}")
     private val chatGptVersion: String,
     private val client: OpenAIClient,
     private val c4Manager: C4Manager,
