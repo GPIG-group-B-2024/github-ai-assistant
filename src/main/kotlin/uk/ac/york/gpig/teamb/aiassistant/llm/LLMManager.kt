@@ -125,7 +125,7 @@ class LLMManager(
             } catch (e: Exception) {
                 logger.error("Marking conversation $conversationId as failed after 1st user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error: $e ")
+                throw Exception("LLM query in conversation $conversationId failed with error after 1st user message: $e ")
             }
 
         // store chatGPT's response into the database
@@ -163,7 +163,7 @@ class LLMManager(
             } catch (e: Exception) {
                 logger.error("Marking conversation $conversationId as failed after 2nd user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error: $e ")
+                throw Exception("LLM query in conversation $conversationId failed with error after 2nd user message: $e ")
             }
         // we have received the pull request data. Write the remaining message to the database, mark the conversation as complete and return the data.
         transactionTemplate.execute {
