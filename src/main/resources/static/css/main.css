@@ -187,13 +187,8 @@ tbody tr:hover {
   background-color: orange;
 
   &::before {
-    content: "";
-    width: 0.5em;
-    height: 0.5em;
-    border-radius: 100%;
-    border: 5px solid gray;
-    border-top-color: black;
-    display: inline-block;
+    content: "\f110";
+    font-family: FontAwesome, serif;
     animation: spin 2s linear infinite;
   }
 }
