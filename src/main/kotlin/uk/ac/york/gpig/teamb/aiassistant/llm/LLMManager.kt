@@ -1,6 +1,7 @@
 package uk.ac.york.gpig.teamb.aiassistant.llm
 
 import com.google.gson.Gson
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import org.springframework.transaction.support.TransactionTemplate
@@ -76,6 +77,8 @@ class LLMManager(
             """.trimIndent(),
         )
 
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Walk through the conversation flow outlined in the issue description
      * */
@@ -115,9 +118,15 @@ class LLMManager(
 
         // make first request: we should get a list of files back
         val filesToInspectInFull =
-            client.performStructuredOutputQuery(
-                firstRequestData,
-            )
+            try {
+                client.performStructuredOutputQuery(
+                    firstRequestData,
+                )
+            } catch (e: Exception) {
+                logger.error("Marking conversation $conversationId as failed after 1st user message")
+                conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
+                throw Exception("LLM query in conversation $conversationId failed with error: $e ")
+            }
 
         // store chatGPT's response into the database
         val chatGptResponseMessage =
@@ -137,19 +146,25 @@ class LLMManager(
         conversationManager.addMessageToConversation(conversationId, secondMessage)
 
         val pullRequestData =
-            client.performStructuredOutputQuery(
-                OpenAIStructuredRequestData(
-                    model = chatGptVersion,
-                    responseFormatClass = LLMPullRequestData::class,
-                    messages =
-                        listOf(
-                            systemPrompt,
-                            initialMessage,
-                            chatGptResponseMessage,
-                            secondMessage,
-                        ),
-                ),
-            )
+            try {
+                client.performStructuredOutputQuery(
+                    OpenAIStructuredRequestData(
+                        model = chatGptVersion,
+                        responseFormatClass = LLMPullRequestData::class,
+                        messages =
+                            listOf(
+                                systemPrompt,
+                                initialMessage,
+                                chatGptResponseMessage,
+                                secondMessage,
+                            ),
+                    ),
+                )
+            } catch (e: Exception) {
+                logger.error("Marking conversation $conversationId as failed after 2nd user message")
+                conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
+                throw Exception("LLM query in conversation $conversationId failed with error: $e ")
+            }
         // we have received the pull request data. Write the remaining message to the database, mark the conversation as complete and return the data.
         transactionTemplate.execute {
             conversationManager.addMessageToConversation(
