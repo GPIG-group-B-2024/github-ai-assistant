@@ -336,7 +336,7 @@ class LLMManagerTest {
                 get { this.first().status }.isEqualTo(ConversationStatus.FAILED)
             }
 
-            // check that there are 2 recorded messages (system prompt, 1st user, assistant, 2nd user, FAIL)
+            // check that there are 4 recorded messages (system prompt, 1st user, assistant, 2nd user, FAIL)
             expectThat(
                 ctx.selectFrom(LLM_MESSAGE).orderBy(LLM_MESSAGE.CREATED_AT).fetch().map { it.role },
             ).containsExactly(
