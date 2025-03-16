@@ -1,6 +1,8 @@
 package uk.ac.york.gpig.teamb.aiassistant.controllers
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.annotation.AuthenticationPrincipal
+import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,11 +18,15 @@ class ConversationAdminController(
     private val llmConversationManager: LLMConversationManager,
 ) {
     @GetMapping("/conversations")
-    fun index(model: Model): String {
+    fun index(
+        model: Model,
+        @AuthenticationPrincipal principal: OidcUser,
+    ): String {
         val conversations = llmConversationManager.fetchConversations()
         model.run {
             addAttribute("conversationCount", conversations.size)
             addAttribute("data", conversations)
+            addAttribute("profile", principal.claims)
         }
         return "admin/index"
     }
