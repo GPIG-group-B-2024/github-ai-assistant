@@ -30,6 +30,7 @@ class OAuthSecurityConfig(
             authorizeHttpRequests {
                 authorize("/css/**", permitAll)
                 authorize("/webhooks", permitAll)
+                authorize("/admin", authenticated)
                 authorize("/admin/**", authenticated)
             }
             oauth2Login { }
