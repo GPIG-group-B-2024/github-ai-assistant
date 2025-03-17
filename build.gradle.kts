@@ -61,6 +61,7 @@ dependencies {
   // generation
   // (openAI)
   testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("io.strikt:strikt-core:0.35.1") // assertions
   testImplementation("com.ninja-squad:springmockk:4.0.2") // mocking
