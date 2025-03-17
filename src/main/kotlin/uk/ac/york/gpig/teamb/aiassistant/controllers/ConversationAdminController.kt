@@ -38,12 +38,14 @@ class ConversationAdminController(
     fun conversationPage(
         model: Model,
         @PathVariable conversationId: UUID,
+        @AuthenticationPrincipal principal: OidcUser,
     ): String {
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.run {
             addAttribute("conversationId", conversationId)
             addAttribute("messageCount", messages.size)
             addAttribute("data", messages)
+            addAttribute("profile", principal.claims)
         }
         return "admin/conversation"
     }

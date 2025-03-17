@@ -193,6 +193,44 @@ tbody tr:hover {
   }
 }
 
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 20px;
+  margin-right: 20px;
+}
+
+.profile-info {
+  display: inline-flex;
+  gap: 0.5em;
+  box-shadow: 0 0 20px gray;
+  padding: 2px;
+  border-radius: 5px;
+}
+
+.email-logout {
+  display: block;
+}
+
+.email-logout button {
+  border-radius: 5px;
+  height: fit-content;
+  background-color: cornflowerblue;
+  color: white;
+  font-size: 12pt;
+
+  &:hover {
+    background-color: whitesmoke;
+    transition: background-color 0.2s ease;
+  }
+}
+
+.profile-info img {
+  height: 3em;
+  border-radius: 100%;
+}
+
 @keyframes spin {
   100% {
     transform: rotate(360deg);
