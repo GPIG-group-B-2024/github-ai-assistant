@@ -47,9 +47,11 @@ class ConversationAdminController(
         @PathVariable conversationId: UUID,
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
-        if (!principal.email.endsWith("@york.ac.uk")) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
-        }
+        principal.email?.takeIf {
+            it.endsWith(
+                "@york.ac.uk",
+            )
+        } ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.run {
             addAttribute("conversationId", conversationId)
