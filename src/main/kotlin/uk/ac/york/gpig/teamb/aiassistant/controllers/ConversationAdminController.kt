@@ -1,6 +1,7 @@
 package uk.ac.york.gpig.teamb.aiassistant.controllers
 
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.http.HttpStatus
 import org.springframework.security.core.annotation.AuthenticationPrincipal
 import org.springframework.security.oauth2.core.oidc.user.OidcUser
 import org.springframework.stereotype.Controller
@@ -8,6 +9,7 @@ import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.server.ResponseStatusException
 import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.LLMConversationManager
 import java.util.UUID
 
@@ -22,6 +24,11 @@ class ConversationAdminController(
         model: Model,
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
+        principal.email?.takeIf {
+            it.endsWith(
+                "@york.ac.uk",
+            )
+        } ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
         val conversations = llmConversationManager.fetchConversations()
         model.run {
             addAttribute("conversationCount", conversations.size)
@@ -40,6 +47,9 @@ class ConversationAdminController(
         @PathVariable conversationId: UUID,
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
+        if (!principal.email.endsWith("@york.ac.uk")) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+        }
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.run {
             addAttribute("conversationId", conversationId)

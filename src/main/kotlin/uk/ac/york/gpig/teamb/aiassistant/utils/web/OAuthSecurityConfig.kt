@@ -33,6 +33,7 @@ class OAuthSecurityConfig() {
                 authorize(HttpMethod.POST, "/webhooks", permitAll)
                 authorize("/admin", authenticated)
                 authorize("/admin/**", authenticated)
+                authorize(anyRequest, denyAll)
             }
             csrf {
                 ignoringRequestMatchers("/webhooks") // we will authenticate this separately by using the github secret
