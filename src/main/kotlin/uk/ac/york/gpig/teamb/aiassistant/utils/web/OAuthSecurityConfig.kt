@@ -33,6 +33,7 @@ class OAuthSecurityConfig() {
                 authorize(HttpMethod.POST, "/webhooks", permitAll)
                 authorize("/admin", authenticated)
                 authorize("/admin/**", authenticated)
+                // this is a standard practice, reject all requests to unknown URL's
                 authorize(anyRequest, denyAll)
             }
             csrf {

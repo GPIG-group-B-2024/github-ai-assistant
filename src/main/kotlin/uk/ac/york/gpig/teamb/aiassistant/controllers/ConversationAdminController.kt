@@ -24,11 +24,9 @@ class ConversationAdminController(
         model: Model,
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
-        principal.email?.takeIf {
-            it.endsWith(
-                "@york.ac.uk",
-            )
-        } ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+        if (!principal.email.endsWith("@york.ac.uk")) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+        }
         val conversations = llmConversationManager.fetchConversations()
         model.run {
             addAttribute("conversationCount", conversations.size)
@@ -47,11 +45,9 @@ class ConversationAdminController(
         @PathVariable conversationId: UUID,
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
-        principal.email?.takeIf {
-            it.endsWith(
-                "@york.ac.uk",
-            )
-        } ?: throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+        if (!principal.email.endsWith("@york.ac.uk")) {
+            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+        }
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.run {
             addAttribute("conversationId", conversationId)
