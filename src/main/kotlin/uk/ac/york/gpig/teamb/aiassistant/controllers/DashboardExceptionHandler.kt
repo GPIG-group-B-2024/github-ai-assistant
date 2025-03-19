@@ -13,21 +13,16 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice(assignableTypes = [ConversationAdminController::class])
 class DashboardExceptionHandler : ResponseEntityExceptionHandler() {
     @ExceptionHandler(ResponseStatusException::class)
-    fun handleAccessDeniedException(
+    fun handleResponseStatusException(
         ex: ResponseStatusException,
         @AuthenticationPrincipal principal: OidcUser?,
         model: Model,
         resp: HttpServletResponse,
-    ): String {
-        return when (ex.statusCode) {
+    ): String =
+        when (ex.statusCode) {
             // populate the "unauthorized" template with user data
-            HttpStatus.FORBIDDEN ->
-                model.addAttribute("profile", principal?.claims).let {
-                    resp.status = HttpStatus.FORBIDDEN.value()
-                    "error/403"
-                }
+            HttpStatus.FORBIDDEN -> model.addAttribute("profile", principal?.claims).let { "error/403" }
             // some other error, return the generic error page
             else -> "error"
-        }
-    }
+        }.also { resp.status = ex.statusCode.value() } // make sure response is not 200 when rendering a template
 }
