@@ -2,8 +2,6 @@ package uk.ac.york.gpig.teamb.aiassistant.utils.auth
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
-import org.springframework.util.ResourceUtils
-import java.io.File
 import java.security.KeyFactory
 import java.security.PrivateKey
 import java.security.interfaces.RSAKey

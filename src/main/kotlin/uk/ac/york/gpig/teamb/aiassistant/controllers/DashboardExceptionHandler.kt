@@ -17,14 +17,15 @@ class DashboardExceptionHandler : ResponseEntityExceptionHandler() {
         ex: ResponseStatusException,
         @AuthenticationPrincipal principal: OidcUser?,
         model: Model,
-        resp: HttpServletResponse
-    ): String  {
+        resp: HttpServletResponse,
+    ): String {
         return when (ex.statusCode) {
             // populate the "unauthorized" template with user data
-            HttpStatus.FORBIDDEN -> model.addAttribute("profile", principal?.claims).let{
-                resp.status = HttpStatus.FORBIDDEN.value()
-                "error/403"
-            }
+            HttpStatus.FORBIDDEN ->
+                model.addAttribute("profile", principal?.claims).let {
+                    resp.status = HttpStatus.FORBIDDEN.value()
+                    "error/403"
+                }
             // some other error, return the generic error page
             else -> "error"
         }
