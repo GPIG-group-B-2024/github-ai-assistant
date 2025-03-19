@@ -25,7 +25,7 @@ class ConversationAdminController(
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
         if (!principal.email.endsWith("@york.ac.uk")) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN)
         }
         val conversations = llmConversationManager.fetchConversations()
         model.run {
@@ -46,7 +46,7 @@ class ConversationAdminController(
         @AuthenticationPrincipal principal: OidcUser,
     ): String {
         if (!principal.email.endsWith("@york.ac.uk")) {
-            throw ResponseStatusException(HttpStatus.FORBIDDEN, "Invalid email domain")
+            throw ResponseStatusException(HttpStatus.FORBIDDEN)
         }
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
         model.run {
