@@ -32,7 +32,7 @@ class WebhookControllerMockMvcTest {
 
     val mockWebhook =
         WebhookPayload(
-            action = WebhookPayload.Action.OPENED,
+            action = Action.OPENED,
             issue =
                 WebhookPayload.Issue(
                     id = 12345L,
@@ -57,7 +57,7 @@ class WebhookControllerMockMvcTest {
     private fun createMockSignature(
         mockPayload: WebhookPayload,
         mockSecret: String = "my-fancy-secret",
-    ): String  {
+    ): String {
         // Just following the process outlined in github docs here: Use the (mock) secret as the key and encode the payload
         val hmacSha256 = Mac.getInstance(ALGORITHM).apply { init(SecretKeySpec(mockSecret.toByteArray(), ALGORITHM)) }
         val requestBody = Gson().toJson(mockPayload).toByteArray()
@@ -115,7 +115,8 @@ class WebhookControllerMockMvcTest {
 
     @Test
     fun `should log unsupported action for valid event type and not call issueManager`() {
-        val mockSignature = createMockSignature(mockWebhook)
+        val unsupportedOpWebhook = mockWebhook.copy(action = Action.CLOSED)
+        val mockSignature = createMockSignature(unsupportedOpWebhook)
         mockMvc.perform(
             post(
                 "/webhooks",
@@ -126,12 +127,12 @@ class WebhookControllerMockMvcTest {
                 .header("x-github-hook-installation-target-type", "repository")
                 .header("x-hub-signature-256", mockSignature)
                 .contentType(MediaType.APPLICATION_JSON).content(
-                    Gson().toJson(mockWebhook),
+                    Gson().toJson(unsupportedOpWebhook),
                 ),
         )
 
         verify(exactly = 0) {
-            vcsManager.processNewIssue(mockWebhook)
+            vcsManager.processNewIssue(unsupportedOpWebhook)
         }
     }
 
@@ -147,15 +148,42 @@ class WebhookControllerMockMvcTest {
                 "x-github-event",
                 "issues",
             ).apply {
+                header("x-hub-signature-256", mockSignature)
                 if (targetTypeHeader != null) {
                     header("x-github-installation-target-type", targetTypeHeader)
-                        .header("x-hub-signature-256", mockSignature)
                 }
             }.contentType(MediaType.APPLICATION_JSON).content(
                 Gson().toJson(mockWebhook),
             ),
         ).andExpect {
-            status().is4xxClientError
+            status().isForbidden
+        }
+
+        verify(exactly = 0) {
+            vcsManager.processNewIssue(mockWebhook)
+        }
+    }
+
+    @ParameterizedTest
+    @NullSource
+    @ValueSource(strings = ["im not the right value!"])
+    fun `should block request when x-hub-signature is missing or wrong`(signatureHeader: String?) {
+        mockMvc.perform(
+            post(
+                "/webhooks",
+            ).header(
+                "x-github-event",
+                "issues",
+            ).apply {
+                header("x-github-installation-target-type", "repository")
+                if (signatureHeader != null) {
+                    header("x-hub-signature-256", signatureHeader)
+                }
+            }.contentType(MediaType.APPLICATION_JSON).content(
+                Gson().toJson(mockWebhook),
+            ),
+        ).andExpect {
+            if (signatureHeader == null) status().isUnauthorized else status().isForbidden
         }
 
         verify(exactly = 0) {
