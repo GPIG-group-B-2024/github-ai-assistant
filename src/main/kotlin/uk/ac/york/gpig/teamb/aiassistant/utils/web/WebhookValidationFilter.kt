@@ -52,7 +52,7 @@ class WebhookValidationFilter(
         // convert the encrypted bytes to hex string
         val expectedHashHex = hmacSha256.doFinal(cachedRequest.requestBodyBytes).joinToString("") { "%02x".format(it) }
         when {
-            targetHeader == "repository" &&
+            targetHeader == "integration" &&
                 constantTimeCompare(
                     payloadHashHex,
                     expectedHashHex,
