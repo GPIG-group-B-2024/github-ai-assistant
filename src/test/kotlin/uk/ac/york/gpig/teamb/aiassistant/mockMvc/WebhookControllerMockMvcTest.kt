@@ -74,7 +74,7 @@ class WebhookControllerMockMvcTest {
             ).header(
                 "x-github-event",
                 "issues",
-            ).header("x-github-hook-installation-target-type", "repository")
+            ).header("x-github-hook-installation-target-type", "integration")
                 .header("x-hub-signature-256", mockSignature)
                 .contentType(MediaType.APPLICATION_JSON).content(
                     Gson().toJson(mockWebhook),
@@ -99,7 +99,7 @@ class WebhookControllerMockMvcTest {
                 "x-github-event",
                 "issue_comment",
             )
-                .header("x-github-hook-installation-target-type", "repository")
+                .header("x-github-hook-installation-target-type", "integration")
                 .header("x-hub-signature-256", mockSignature)
                 .contentType(MediaType.APPLICATION_JSON).content(
                     Gson().toJson(commentCreatedMockWebhook),
@@ -198,7 +198,7 @@ class WebhookControllerMockMvcTest {
             post(
                 "/webhooks",
             )
-                .header("x-github-hook-installation-target-type", "repository")
+                .header("x-github-hook-installation-target-type", "integration")
                 .header("x-hub-signature-256", mockSignature)
                 .contentType(MediaType.APPLICATION_JSON).content(
                     Gson().toJson(mockWebhook),
