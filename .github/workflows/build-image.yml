@@ -1,0 +1,34 @@
+name: Build and update image
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: [ "CI" ]
+    types: [ completed ]
+    branches:
+      - "main"
+
+permissions: write-all
+
+jobs:
+  build-image:
+    name: Build and run tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean old build folder
+        run: ./gradlew --no-daemon clean
+      - name: Build JAR
+        run: ./gradlew --no-daemon assemble
+      - name: Build docker image
+        run: docker build -t teamb-ai-assistant:latest .
+      - name: Tag docker image
+        run: docker tag teamb-ai-assistant:latest ghcr.io/gpig-group-b-2024/teamb-ai-assistant
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Push image
+        run: docker push ghcr.io/gpig-group-b-2024/teamb-ai-assistant:latest

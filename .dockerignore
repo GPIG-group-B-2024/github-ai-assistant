@@ -1,0 +1,9 @@
+.*
+*.iml
+.idea
+.vscode
+gradle
+src
+# exclude build binaries
+build/*
+!build/libs
