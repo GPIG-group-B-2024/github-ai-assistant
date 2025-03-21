@@ -14,7 +14,7 @@ permissions: write-all
 
 jobs:
   build-image:
-    name: Build and run tests
+    name: Build and publish image to ghcr.io
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
