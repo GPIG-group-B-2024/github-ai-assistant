@@ -19,9 +19,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Clean old build folder
-        run: ./gradlew --no-daemon clean
+        run: ./gradlew clean
+      - name: Generate JOOQ classes
+        run: ./gradlew generateJooq
       - name: Build JAR
-        run: ./gradlew --no-daemon assemble
+        run: ./gradlew assemble
       - name: Build docker image
         run: docker build -t teamb-ai-assistant:latest .
       - name: Tag docker image
