@@ -40,7 +40,8 @@ dependencies {
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.springframework.boot:spring-boot-starter-security")
   implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
-  implementation("org.springframework.boot:spring-boot-starter-actuator") // health checks, status, etc.
+  implementation(
+      "org.springframework.boot:spring-boot-starter-actuator") // health checks, status, etc.
   testImplementation("org.springframework.security:spring-security-test")
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
