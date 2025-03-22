@@ -25,4 +25,4 @@ app_settings:
 
 logging:
   level:
-    root: warn
+    root: info
