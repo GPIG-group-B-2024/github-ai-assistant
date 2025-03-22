@@ -9,8 +9,8 @@ plugins {
   id("org.flywaydb.flyway") version "9.7.0"
   id("com.diffplug.spotless") version "6.25.0"
   id("org.springframework.boot") version "3.3.5"
-  id("com.gorylenko.gradle-git-properties") version "2.5.0"
   id("io.spring.dependency-management") version "1.1.6"
+  id("com.gorylenko.gradle-git-properties") version "2.5.0"
 }
 
 buildscript {
@@ -35,15 +35,14 @@ dependencyManagement {
 
 dependencies {
   implementation("org.springframework.boot:spring-boot-starter-web")
-  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-  implementation("com.okta.spring:okta-spring-boot-starter:3.0.5")
-  implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
+  implementation("com.okta.spring:okta-spring-boot-starter:3.0.7")
   implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
   implementation("org.springframework.boot:spring-boot-starter-security")
+  implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+  implementation("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
   implementation("org.thymeleaf.extras:thymeleaf-extras-springsecurity6")
   implementation(
       "org.springframework.boot:spring-boot-starter-actuator") // health checks, status, etc.
-  testImplementation("org.springframework.security:spring-security-test")
   developmentOnly("org.springframework.boot:spring-boot-devtools")
   implementation("org.jetbrains.kotlin:kotlin-reflect")
   implementation("org.eclipse.jgit:org.eclipse.jgit:7.0.0.202409031743-r") // git API
@@ -64,6 +63,7 @@ dependencies {
   // generation
   // (openAI)
   testImplementation("org.springframework.boot:spring-boot-starter-test")
+  testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.springframework.security:spring-security-test")
   testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
   testImplementation("io.strikt:strikt-core:0.35.1") // assertions
