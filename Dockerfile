@@ -1,4 +1,6 @@
 # check=skip=SecretsUsedInArgOrEnv
+# ^ disabling this warning because the JOOQ_DB_PASSWORD is not actually a secret. It is a temporary database that gets destroyed
+# as soon as the build process ends and only exists to run flyway migrations.
 # Step 1: build the app JAR.
 # Because the generateJooq task requires a database connection AND we cannot start a testcontainer in a docker build,
 # we need to find another way. Use a postgres container to start a local db and build the app there instead.
