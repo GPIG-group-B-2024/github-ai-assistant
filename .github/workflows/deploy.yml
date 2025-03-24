@@ -1,9 +1,9 @@
-name: Build and update image
+name: Deploy app to Koyeb
 
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: [ "Build and update image" ]
+    workflows: [ "CI" ]
     types: [ completed ]
     branches:
       - "main"
@@ -11,8 +11,8 @@ on:
 permissions: read-all
 
 jobs:
-  build-image:
-    name: Build and publish image to ghcr.io
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
       - name: Install and configure the Koyeb CLI
