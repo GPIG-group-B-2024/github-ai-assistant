@@ -52,10 +52,12 @@ class ConversationAdminController(
             throw ResponseStatusException(HttpStatus.FORBIDDEN)
         }
         val messages = llmConversationManager.fetchConversationMessages(conversationId)
+        val conversation = llmConversationManager.fetchConversation(conversationId)
         model.run {
             addAttribute("conversationId", conversationId)
             addAttribute("messageCount", messages.size)
             addAttribute("data", messages)
+            addAttribute("conversation", conversation)
             addAttribute("profile", principal.claims)
         }
         return "admin/conversation"

@@ -25,6 +25,23 @@
         />
         messages)
       </h2>
+      <div th:switch="${conversation.status.toString()}">
+        <div
+                th:case="'IN_PROGRESS'"
+                class="badge badge-conversation-in-progress"
+                th:text="${conversation.status.toString().replace('_', ' ')}"
+        ></div>
+        <div
+                th:case="'COMPLETED'"
+                class="badge badge-conversation-completed"
+                th:text="${conversation.status.toString().replace('_', ' ')}"
+        ></div>
+        <div
+                th:case="'FAILED'"
+                class="badge badge-conversation-failed"
+                th:text="${conversation.status.toString().replace('_', ' ')}"
+        ></div>
+      </div>
 
       <a href="/admin/conversations" class="button button-home">
         <i class="fa fa-home"></i>
