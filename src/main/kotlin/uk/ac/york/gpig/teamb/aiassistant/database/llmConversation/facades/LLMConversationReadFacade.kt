@@ -62,8 +62,10 @@ class LLMConversationReadFacade(
                 .on(LLM_CONVERSATION.REPO_ID.eq(GITHUB_REPOSITORY.ID)),
         ).fetch(LLMConversationEntity::fromJooq)
 
-    fun fetchConversation(id: UUID) = ctx.selectFrom(LLM_CONVERSATION).where(LLM_CONVERSATION.ID.eq(id)).fetchOne(
-        LLMConversationEntity::fromJooq)
+    fun fetchConversation(id: UUID) =
+        ctx.selectFrom(LLM_CONVERSATION).where(LLM_CONVERSATION.ID.eq(id)).fetchOne(
+            LLMConversationEntity::fromJooq,
+        )
 
     /**
      * Check if we already have a conversation for this issue in this repository.
