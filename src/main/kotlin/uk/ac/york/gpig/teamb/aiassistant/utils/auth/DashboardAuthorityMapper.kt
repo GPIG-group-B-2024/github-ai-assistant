@@ -1,4 +1,4 @@
-package uk.ac.york.gpig.teamb.aiassistant.utils.web
+package uk.ac.york.gpig.teamb.aiassistant.utils.auth
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.security.core.authority.SimpleGrantedAuthority

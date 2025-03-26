@@ -1,4 +1,4 @@
-package uk.ac.york.gpig.teamb.aiassistant.utils.web
+package uk.ac.york.gpig.teamb.aiassistant.utils.auth
 
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -22,8 +22,8 @@ class OAuthSecurityConfig(
 ) {
     /**
      * Set up security so that:
-     *  - Any authenticated user can see the admin dashboard (read-only)
-     *  - No authentication is required for the webhook endpoint (will handle separately)
+     *  - Users with the right permissions have read-only access to the dashboard
+     *  - No authentication is required for the webhook endpoint (handled in [WebhookValidationFilter])
      * */
 
     @Bean

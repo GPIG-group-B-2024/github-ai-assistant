@@ -22,8 +22,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders
 import org.springframework.web.context.WebApplicationContext
 import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.LLMConversationManager
 import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.entities.LLMConversationEntity
-import uk.ac.york.gpig.teamb.aiassistant.utils.web.DashboardAuthorityMapper
-import uk.ac.york.gpig.teamb.aiassistant.utils.web.OAuthSecurityConfig
+import uk.ac.york.gpig.teamb.aiassistant.utils.auth.DashboardAuthorityMapper
+import uk.ac.york.gpig.teamb.aiassistant.utils.auth.OAuthSecurityConfig
 import java.time.Instant
 
 @AutoConfigureMockMvc
