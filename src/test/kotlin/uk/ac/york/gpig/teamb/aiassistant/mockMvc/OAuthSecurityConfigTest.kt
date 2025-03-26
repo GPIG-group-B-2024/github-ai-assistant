@@ -21,7 +21,7 @@ import java.time.Instant
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ActiveProfiles("test")
+@ActiveProfiles("test", "oauth-test")
 class OAuthSecurityConfigTest {
     @Autowired
     private lateinit var mockMvc: MockMvc
