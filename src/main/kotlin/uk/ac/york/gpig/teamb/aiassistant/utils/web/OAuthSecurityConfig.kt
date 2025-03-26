@@ -27,20 +27,25 @@ class OAuthSecurityConfig(
      * */
 
     @Bean
-    fun filterChain(http: HttpSecurity): SecurityFilterChain {
+    fun securityFilterChain(http: HttpSecurity): SecurityFilterChain {
         http {
             authorizeHttpRequests {
-                authorize("/css/**", permitAll)
+                authorize("/css/**", permitAll) // make sure stylesheets are not blocked
                 authorize(HttpMethod.GET, "/actuator/**", permitAll)
                 authorize(HttpMethod.POST, "/webhooks", permitAll)
+                // dashboard URL's
                 authorize(HttpMethod.GET, "/", hasAuthority("dashboard:view"))
                 authorize("/admin", hasAuthority("dashboard:view"))
                 authorize("/admin/**", hasAuthority("dashboard:view"))
+                authorize(HttpMethod.GET, "/error/**", permitAll) // let users see the pretty error page
                 // this is a standard practice, reject all requests to unknown URL's
                 authorize(anyRequest, denyAll)
             }
             csrf {
                 ignoringRequestMatchers("/webhooks") // we will authenticate this separately by using the github secret
+            }
+            exceptionHandling {
+                accessDeniedPage = "/error/403"
             }
             oauth2Login {
                 userInfoEndpoint {
@@ -48,8 +53,7 @@ class OAuthSecurityConfig(
                 }
             }
             oauth2ResourceServer {
-                jwt {
-                }
+                jwt {}
             }
             logout {
                 addLogoutHandler(logoutHandler)

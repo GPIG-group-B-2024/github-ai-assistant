@@ -11,3 +11,8 @@ app_settings:
   github_webhook_secret: my-fancy-secret
   github_app_key: my-fancy-key
   auth0_groups-claim: my-cool-claim
+
+okta:
+  oauth2:
+    issuer: https://gpig-teamb.uk.auth0.com/
+    client-id: my-client
