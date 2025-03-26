@@ -13,17 +13,18 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 
 @Configuration
 @EnableWebSecurity
-class OAuthSecurityConfig() {
+class OAuthSecurityConfig(
+    private val authorityMapper: DashboardAuthorityMapper,
+    @Value("\${okta.oauth2.issuer}")
+    private val issuer: String,
+    @Value("\${okta.oauth2.client-id}")
+    private val clientId: String,
+) {
     /**
      * Set up security so that:
      *  - Any authenticated user can see the admin dashboard (read-only)
      *  - No authentication is required for the webhook endpoint (will handle separately)
      * */
-    @Value("\${okta.oauth2.issuer}")
-    private lateinit var issuer: String
-
-    @Value("\${okta.oauth2.client-id}")
-    private lateinit var clientId: String
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
@@ -32,16 +33,24 @@ class OAuthSecurityConfig() {
                 authorize("/css/**", permitAll)
                 authorize(HttpMethod.GET, "/actuator/**", permitAll)
                 authorize(HttpMethod.POST, "/webhooks", permitAll)
-                authorize(HttpMethod.GET, "/", authenticated)
-                authorize("/admin", authenticated)
-                authorize("/admin/**", authenticated)
+                authorize(HttpMethod.GET, "/", hasAuthority("dashboard:view"))
+                authorize("/admin", hasAuthority("dashboard:view"))
+                authorize("/admin/**", hasAuthority("dashboard:view"))
                 // this is a standard practice, reject all requests to unknown URL's
                 authorize(anyRequest, denyAll)
             }
             csrf {
                 ignoringRequestMatchers("/webhooks") // we will authenticate this separately by using the github secret
             }
-            oauth2Login { }
+            oauth2Login {
+                userInfoEndpoint {
+                    oidcUserService = authorityMapper
+                }
+            }
+            oauth2ResourceServer {
+                jwt {
+                }
+            }
             logout {
                 addLogoutHandler(logoutHandler)
             }
