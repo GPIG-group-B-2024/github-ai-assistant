@@ -14,5 +14,5 @@ app_settings:
 
 okta:
   oauth2:
-    issuer: https://gpig-teamb.uk.auth0.com/
-    client-id: my-client
+    issuer: https://localhost:8080
+    client-id: test-client-id

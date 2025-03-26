@@ -53,7 +53,8 @@ class OAuthSecurityConfig(
                 }
             }
             oauth2ResourceServer {
-                jwt {}
+                jwt {
+                }
             }
             logout {
                 addLogoutHandler(logoutHandler)
