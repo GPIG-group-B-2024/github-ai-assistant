@@ -21,25 +21,13 @@
 .messages-container {
   display: grid;
   gap: 3rlh;
+  padding-top: 10vh;
   padding-bottom: 20px;
 }
 
 .message-container {
   display: grid;
   gap: 5px;
-}
-
-.message-container-assistant {
-  margin-left: 2vw;
-  justify-self: start;
-  justify-items: start;
-}
-
-.message-container-system,
-.message-container-user {
-  margin-right: 2vw;
-  justify-self: end;
-  justify-items: end;
 }
 
 .message {
@@ -52,6 +40,31 @@
   white-space: pre-line;
 }
 
+.message-container-assistant {
+  margin-left: 2vw;
+  justify-self: start;
+  justify-items: start;
+
+  & .message {
+    background: cornflowerblue;
+    color: whitesmoke;
+  }
+}
+
+.message-container-system,
+.message-container-user {
+  margin-right: 2vw;
+  justify-self: end;
+  justify-items: end;
+
+  & .message {
+    /* stylelint-disable */
+    /* credit to https://stackoverflow.com/questions/71154905/css-for-chat-room-speech-bubble-position */
+    border-radius: 20px 20px 20px 1px;
+    /* stylelint-enable */
+  }
+}
+
 .message-timestamp {
   font-size: 12pt;
   color: gray;
@@ -61,18 +74,6 @@
 
 .message-container-system .message {
   border: 2px dashed gray;
-  /* stylelint-disable */
-  border-radius: 20px 20px 1px 20px;
-  /* stylelint-enable */
-}
-
-.message-container-assistant .message {
-  background: cornflowerblue;
-  color: whitesmoke;
-  /* stylelint-disable */
-  /* credit to https://stackoverflow.com/questions/71154905/css-for-chat-room-speech-bubble-position */
-  border-radius: 20px 20px 20px 1px;
-  /* stylelint-enable */
 }
 
 .message-container-user .message {
