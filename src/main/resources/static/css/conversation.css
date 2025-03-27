@@ -48,6 +48,9 @@
   & .message {
     background: cornflowerblue;
     color: whitesmoke;
+    /* stylelint-disable */
+    border-radius: 20px 20px 20px 1px;
+    /* stylelint-enable */
   }
 }
 
@@ -60,7 +63,7 @@
   & .message {
     /* stylelint-disable */
     /* credit to https://stackoverflow.com/questions/71154905/css-for-chat-room-speech-bubble-position */
-    border-radius: 20px 20px 20px 1px;
+    border-radius: 20px 20px 1px 20px;
     /* stylelint-enable */
   }
 }
@@ -79,7 +82,4 @@
 .message-container-user .message {
   border: 2px solid gray;
   background: whitesmoke;
-  /* stylelint-disable */
-  border-radius: 20px 20px 1px 20px;
-  /* stylelint-enable */
 }
