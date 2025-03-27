@@ -14,19 +14,23 @@ class DashboardAuthorityMapper(
     @Value("\${app_settings.auth0_groups-claim}")
     private val groupsClaim: String,
 ) : OidcUserService() {
+    /**
+     * Assign app roles based on the auth0 user data.
+     *
+     * The auth0 configuration automatically grants access to all users with a York email.
+     * To access the dashboard, the "guest" role is enough
+     *
+     * */
     override fun loadUser(userRequest: OidcUserRequest?): OidcUser? {
         val oidcUser: OAuth2User = super.loadUser(userRequest)
         val oldAuthorities = oidcUser.authorities
 
         @Suppress("UNCHECKED_CAST") // not ideal, but we know the format of this is consistent
-        val assignedRoles = (oidcUser.attributes[groupsClaim] as List<String>).map { SimpleGrantedAuthority(it) }
-        val email = oidcUser.attributes["email"] as String?
+        val assignedRoles = (oidcUser.attributes[groupsClaim] as List<String>).map(::SimpleGrantedAuthority)
         val additionalPermissions = mutableListOf<SimpleGrantedAuthority>()
-        // Grant the dashboard permissions to admins, guests, and any york students
-        if (email != null && email.endsWith("@york.ac.uk") ||
-            assignedRoles.any { it.authority == "ROLE_ADMIN" || it.authority == "ROLE_GUEST" }
-        ) {
-            additionalPermissions.add(SimpleGrantedAuthority("dashboard:view"))
+        val hasReadOnlyRole = assignedRoles.any { it.authority == "ROLE_ADMIN" || it.authority == "ROLE_GUEST" }
+        when {
+            hasReadOnlyRole -> additionalPermissions.add(SimpleGrantedAuthority("dashboard:view"))
         }
 
         return DefaultOidcUser(
