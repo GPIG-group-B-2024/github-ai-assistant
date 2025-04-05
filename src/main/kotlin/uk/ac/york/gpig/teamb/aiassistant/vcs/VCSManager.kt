@@ -8,6 +8,7 @@ import uk.ac.york.gpig.teamb.aiassistant.utils.filesystem.withTempDir
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Issue
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Repository
+import uk.ac.york.gpig.teamb.aiassistant.vcs.entities.FileBlob
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.git.GitFacade
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.github.GitHubFacade
 
@@ -26,6 +27,11 @@ class VCSManager(
         repoName: String,
         branchName: String = "main",
     ): String = gitHubFacade.fetchFileTree(repoName, branchName).joinToString("\n")
+
+    fun fetchFileBlobs(
+        repoName: String,
+        filePaths: List<String>,
+    ): List<FileBlob> = gitHubFacade.retrieveBlobs(repoName, filePaths)
 
     fun processNewIssueComment(payload: WebhookPayload) {
         val (issue, _, repository, comment) = payload

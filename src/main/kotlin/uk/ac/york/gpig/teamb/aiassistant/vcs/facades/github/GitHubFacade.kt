@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import uk.ac.york.gpig.teamb.aiassistant.utils.auth.JWTGenerator
+import uk.ac.york.gpig.teamb.aiassistant.vcs.entities.FileBlob
 
 /**
  * Interacts with the GitHub API for GitHub-specific things like pull requests, comments, issues etc.

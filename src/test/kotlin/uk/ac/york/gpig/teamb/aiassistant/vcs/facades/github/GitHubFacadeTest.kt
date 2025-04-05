@@ -1,8 +1,5 @@
 package uk.ac.york.gpig.teamb.aiassistant.vcs.facades.github
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder
 import com.github.tomakehurst.wiremock.client.WireMock.equalToJson
 import com.github.tomakehurst.wiremock.client.WireMock.get
@@ -26,9 +23,8 @@ import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import uk.ac.york.gpig.teamb.aiassistant.testutils.AiAssistantTest
+import uk.ac.york.gpig.teamb.aiassistant.testutils.mocking.MockGithubAPIOutput.mockGithubAPIBlob
 import java.io.File
-import kotlin.io.encoding.Base64
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 @AiAssistantTest
 class GitHubFacadeTest {
@@ -125,28 +121,6 @@ class GitHubFacadeTest {
     @Nested
     @WireMockTest(httpPort = 3000)
     inner class BlobFetchTests {
-        @OptIn(ExperimentalEncodingApi::class)
-        /**
-         * Construct a mock github API response simulating a request for the contents of a given file.
-         *
-         * Example output taken from https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
-         * */
-        private fun mockGithubAPIBlob(
-            filename: String,
-            expectedContent: String,
-        ): String {
-            val objectMapper = ObjectMapper()
-            // grab the json file and parse it into a Json node
-            val initialResponseString = File("src/test/resources/wiremock/github-api/file-contents-output.json").readText()
-            val initialResponseJson = objectMapper.readValue(initialResponseString, JsonNode::class.java)
-
-            val expectedContentEncoded = Base64.encode(expectedContent.toByteArray())
-            // modify the node with our desired info
-            (initialResponseJson as ObjectNode).put("content", expectedContentEncoded)
-            initialResponseJson.put("path", filename)
-            return objectMapper.writeValueAsString(initialResponseJson)
-        }
-
         @Test
         fun `fetches file blob for single file`() {
             val pathToFetch = "README.md" // repo-root/README.md

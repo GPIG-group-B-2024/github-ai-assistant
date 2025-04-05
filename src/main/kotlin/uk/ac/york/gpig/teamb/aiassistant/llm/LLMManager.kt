@@ -34,12 +34,12 @@ class LLMManager(
         OpenAIMessage(
             OpenAIMessage.Role.SYSTEM,
             """
-            You are a software engineer working on a repo called $repoName.
-            
-            You will be provided with an issue description, the repo's file tree and its model in the c4 modelling framework.
-            
-            Your task is to respond to user messages with your best attempts at solving their issue.
-            """.trimIndent(),
+            |You are a software engineer working on a repo called **$repoName**.
+            |
+            |You will be provided with an issue description, the repo's file tree and its model in the structurizr modelling framework.
+            |
+            |Your task is to respond to user messages with your best attempts at solving their issue.
+            """.trimMargin(),
         )
 
     internal fun getRepoInfoMessage(
@@ -48,34 +48,57 @@ class LLMManager(
     ) = OpenAIMessage(
         OpenAIMessage.Role.USER,
         """
-        Here is some information about the repository:
+        |Here is some information about the repository:
         
-        * C4 model: ${c4Manager.gitRepoToStructurizrDsl(repoName)}
-        * File tree: ${vscManager.retrieveFileTree(repoName)}
-        * Issue title: ${issue.title}
-        * Issue body: ${issue.body}
-        
-        Your first task is to give me the list of files you need to inspect in full before creating your solution.
-        You should pick the files that you will need to either know in full or modify when making your fix to the issue.
-        Respond with a single list of strings, where each string represents a path to the file from the **repository root**
-        """.trimIndent(),
+        |   * C4 model: 
+        |       ```
+        |       ${c4Manager.gitRepoToStructurizrDsl(repoName)}
+        |       ```
+        |
+        |   * File tree: 
+        |       ```
+        |        ${vscManager.retrieveFileTree(repoName)}
+        |       ```
+        |
+        |   * Issue title: ${issue.title}
+        |
+        |   * Issue body: ${issue.body}
+        |
+        |Your first task is to give me the list of files you need to inspect in full before creating your solution.
+        |You should pick the files that you will need to either know in full or modify when making your fix to the issue.
+        |Respond with a single list of strings, where each string represents a path to the file from the **repository root**
+        """.trimMargin(),
     )
 
-    internal fun getPullRequestMessage(attachedFiles: FilesResponseSchema) =
-        OpenAIMessage(
+    internal fun getPullRequestMessage(
+        repoName: String,
+        requiredFiles: FilesResponseSchema,
+    ): OpenAIMessage {
+        val fileBlobs = vscManager.fetchFileBlobs(repoName, requiredFiles.fileList)
+        return OpenAIMessage(
             OpenAIMessage.Role.USER,
             """
-            Great. I am now sending you the files you requested. Your task is to now produce a pull request. 
-            Your response should consist of:
-            * Pull request title
-            * Pull request body
-            * Your changes: **IMPORTANT** - you must send the updated files in __full__, they must be able to overwrite 
-            the original file without breaking any functionality not affected by the pull request.
-            
-            Here are the files you requested:
-            ${attachedFiles.fileList.joinToString("\n\n")}
-            """.trimIndent(),
+            |Great. I am now sending you the files you requested. Your task is to now produce a pull request. 
+            |Your response should consist of:
+            |   * Pull request title
+            |   * Pull request body
+            |   * Your changes: **IMPORTANT** - you must send the updated files in __full__, they must be able to overwrite 
+            |   the original file without breaking any functionality not affected by the pull request.
+            |
+            |Here are the files you requested:
+            |${
+                fileBlobs.joinToString("\n\n") {
+                    """
+                    ## ${it.path}
+                    
+                    ${it.contents}
+                    ---
+                    """
+                }
+            }
+            """.trimMargin(),
         )
+    }
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
@@ -141,7 +164,7 @@ class LLMManager(
 
         // send the requested files and ask for the final output - the pull request data
 
-        val secondMessage = getPullRequestMessage(filesToInspectInFull)
+        val secondMessage = getPullRequestMessage(repoName, filesToInspectInFull)
 
         conversationManager.addMessageToConversation(conversationId, secondMessage)
 
