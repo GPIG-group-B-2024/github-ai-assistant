@@ -90,8 +90,9 @@ class LLMManager(
                 fileBlobs.joinToString("\n\n") {
                     """
                     ## ${it.path}
-                    
+                    ```
                     ${it.contents}
+                    ```
                     ---
                     """
                 }

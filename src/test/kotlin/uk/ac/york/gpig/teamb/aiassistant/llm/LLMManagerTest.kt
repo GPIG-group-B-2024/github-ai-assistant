@@ -370,7 +370,7 @@ class LLMManagerTest {
         }
 
         @Test
-        fun `attaches repo name to system prompt`()  {
+        fun `attaches repo name to system prompt`() {
             val repoName = "my-owner/my-test-repo"
             val repoId = prepareTestEnv(repoName)
             sut.produceIssueSolution(
@@ -505,29 +505,31 @@ class LLMManagerTest {
             expectThat(fileBlobMessage?.content).withNotNull {
                 this.isEqualTo(
                     """
-              |Great. I am now sending you the files you requested. Your task is to now produce a pull request. 
-              |Your response should consist of:
-              |   * Pull request title
-              |   * Pull request body
-              |   * Your changes: **IMPORTANT** - you must send the updated files in __full__, they must be able to overwrite 
-              |   the original file without breaking any functionality not affected by the pull request.
-              |
-              |Here are the files you requested:
-              |
-              |                    ## src/weather_app/main.py
-              |                    
-              |                    def greet(name):
-              |    return f'Hello, {name}!'
-              |                    ---
-              |                    
-              |
-              |
-              |                    ## test/weather_app/test_main.py
-              |                    
-              |                    def greet(name):
-              |    return f'Hello, {name}!'
-              |                    ---
-              |                    
+                |Great. I am now sending you the files you requested. Your task is to now produce a pull request. 
+                |Your response should consist of:
+                |   * Pull request title
+                |   * Pull request body
+                |   * Your changes: **IMPORTANT** - you must send the updated files in __full__, they must be able to overwrite 
+                |   the original file without breaking any functionality not affected by the pull request.
+                |
+                |Here are the files you requested:
+                |
+                |                    ## src/weather_app/main.py
+                |                    ```
+                |                    def greet(name):
+                |    return f'Hello, {name}!'
+                |                    ```
+                |                    ---
+                |                    
+                |
+                |
+                |                    ## test/weather_app/test_main.py
+                |                    ```
+                |                    def greet(name):
+                |    return f'Hello, {name}!'
+                |                    ```
+                |                    ---
+                |                    
                     """.trimMargin(),
                 )
             }
