@@ -450,7 +450,7 @@ class LLMManagerTest {
               |		Web-app = container "Web app" "handles incoming HTTP requests"
               |		Database = container "Database" "handles incoming HTTP requests"
               |		}
-              |       Web app -> Database "Reads from and writes to"
+              |       Web-app -> Database "Reads from and writes to"
               |   }
               |}
               |       ```
