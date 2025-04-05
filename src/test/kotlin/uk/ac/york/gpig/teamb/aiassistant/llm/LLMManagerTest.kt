@@ -58,39 +58,40 @@ class LLMManagerTest {
     companion object {
         @RegisterExtension
         val mockGithubAPI: WireMockExtension =
-            WireMockExtension.newInstance().options(
-                wireMockConfig().port(3000),
-            ).build()
+            WireMockExtension
+                .newInstance()
+                .options(
+                    wireMockConfig().port(3000),
+                ).build()
 
         @RegisterExtension
         val mockOpenAIAPI: WireMockExtension =
-            WireMockExtension.newInstance().options(
-                wireMockConfig().port(3001),
-            ).build()
+            WireMockExtension
+                .newInstance()
+                .options(
+                    wireMockConfig().port(3001),
+                ).build()
     }
 
-    @Autowired
-    private lateinit var sut: LLMManager
+    @Autowired private lateinit var sut: LLMManager
 
-    @Autowired
-    private lateinit var ctx: DSLContext
+    @Autowired private lateinit var ctx: DSLContext
 
-    @SpykBean
-    private lateinit var gitHubFacade: GitHubFacade
+    @SpykBean private lateinit var gitHubFacade: GitHubFacade
 
-    @SpykBean
-    private lateinit var client: OpenAIClient
+    @SpykBean private lateinit var client: OpenAIClient
 
     @Nested
     inner class ProduceIssueSolutionTest {
         /**
          * A utility function that:
-         *  - creates a git repo
-         *  - creates a c4 representation
-         *  - creates an issue
-         *  - mocks both the github and openAI's API
-         *  @return the id of the created repo
-         * */
+         * - creates a git repo
+         * - creates a c4 representation
+         * - creates an issue
+         * - mocks both the github and openAI's API
+         *
+         * @return the id of the created repo
+         */
         private fun prepareTestEnv(repoName: String): UUID {
             // step 1: create a repo
             val workspaceId = UUID.randomUUID()
@@ -131,32 +132,40 @@ class LLMManagerTest {
             // step 3.1: mock github endpoints
             // 3.1.1: mock the repo information endpoint
             every { gitHubFacade.generateInstallationToken() } returns "my-fancy-token"
-            val getRepoOutput = File("src/test/resources/wiremock/github-api/get-repo-output.json").readText()
-            mockGithubAPI.stubFor(get(urlEqualTo("/repos/my-owner/my-test-repo")).willReturn(ok().withBody(getRepoOutput)))
+            val getRepoOutput =
+                File("src/test/resources/wiremock/github-api/get-repo-output.json").readText()
+            mockGithubAPI.stubFor(
+                get(urlEqualTo("/repos/my-owner/my-test-repo")).willReturn(ok().withBody(getRepoOutput)),
+            )
             mockGithubAPI.stubFor(
                 get(
                     urlMatching("/repos/my-owner/my-test-repo/git/trees/main.*"),
                 ).willReturn(
                     ok()
                         .withHeader("Content-Type", "application/json")
-                        .withBody(File("src/test/resources/wiremock/github-api/get-repo-tree-output.json").readText()),
+                        .withBody(
+                            File("src/test/resources/wiremock/github-api/get-repo-tree-output.json")
+                                .readText(),
+                        ),
                 ),
             )
             // 3.1.2: mock the /contents endpoints (i.e. create mock base64 outputs)
             listOf("src/weather_app/main.py", "test/weather_app/test_main.py").forEach { path ->
                 mockGithubAPI.stubFor(
-                    get("/repos/my-owner/my-test-repo/contents/$path?ref=HEAD").willReturn(
-                        ok().withBody(
-                            mockGithubAPIBlob(
-                                path,
-                                """
+                    get("/repos/my-owner/my-test-repo/contents/$path?ref=HEAD")
+                        .willReturn(
+                            ok()
+                                .withBody(
+                                    mockGithubAPIBlob(
+                                        path,
+                                        """
                                 # i am $path and this is some cool python code:
                                 def greet(name):
                                     return f'Hello, {name}!'
                                 """,
-                            ),
+                                    ),
+                                ),
                         ),
-                    ),
                 )
             }
             // step 3.2: mock openAI endpoints
@@ -166,12 +175,15 @@ class LLMManagerTest {
                     .inScenario("ChatGPT conversation")
                     .whenScenarioStateIs(STARTED)
                     .willReturn(
-                        ok().withHeader(
-                            "Content-Type",
-                            "application/json",
-                        ).withBody(File("src/test/resources/wiremock/openai-api/list-of-files-response.json").readText()),
-                    )
-                    .willSetStateTo("List of files received"),
+                        ok()
+                            .withHeader(
+                                "Content-Type",
+                                "application/json",
+                            ).withBody(
+                                File("src/test/resources/wiremock/openai-api/list-of-files-response.json")
+                                    .readText(),
+                            ),
+                    ).willSetStateTo("List of files received"),
             )
             // then respond with PR data
             mockOpenAIAPI.stubFor(
@@ -179,10 +191,14 @@ class LLMManagerTest {
                     .inScenario("ChatGPT conversation")
                     .whenScenarioStateIs("List of files received")
                     .willReturn(
-                        ok().withHeader(
-                            "Content-Type",
-                            "application/json",
-                        ).withBody(File("src/test/resources/wiremock/openai-api/pr-data-response.json").readText()),
+                        ok()
+                            .withHeader(
+                                "Content-Type",
+                                "application/json",
+                            ).withBody(
+                                File("src/test/resources/wiremock/openai-api/pr-data-response.json")
+                                    .readText(),
+                            ),
                     ),
             )
             return repoId
@@ -202,14 +218,22 @@ class LLMManagerTest {
                 ),
             )
             // check that the conversation has been created
-            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch()).hasSize(1).get { this.first() }.and {
-                get { this.issueId }.isEqualTo(1)
-                get { this.repoId }.isEqualTo(repoId)
-                get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
-            }
-            // check that there are 5 recorded messages (system prompt, 1st user, 1st response, 2nd user, 2nd response)
+            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch())
+                .hasSize(1)
+                .get { this.first() }
+                .and {
+                    get { this.issueId }.isEqualTo(1)
+                    get { this.repoId }.isEqualTo(repoId)
+                    get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
+                }
+            // check that there are 5 recorded messages (system prompt, 1st user, 1st response, 2nd user,
+            // 2nd response)
             expectThat(
-                ctx.selectFrom(LLM_MESSAGE).orderBy(LLM_MESSAGE.CREATED_AT).fetch().map { it.role },
+                ctx
+                    .selectFrom(LLM_MESSAGE)
+                    .orderBy(LLM_MESSAGE.CREATED_AT)
+                    .fetch()
+                    .map { it.role },
             ).containsExactly(
                 LlmMessageRole.SYSTEM,
                 LlmMessageRole.USER,
@@ -219,8 +243,11 @@ class LLMManagerTest {
             )
             // check that the messages are linked to the conversation
             val conversationId =
-                ctx.select(LLM_CONVERSATION.ID)
-                    .from(LLM_CONVERSATION).fetchOne()?.get(LLM_CONVERSATION.ID)!!
+                ctx
+                    .select(LLM_CONVERSATION.ID)
+                    .from(LLM_CONVERSATION)
+                    .fetchOne()
+                    ?.get(LLM_CONVERSATION.ID)!!
             expectThat(ctx.selectFrom(CONVERSATION_MESSAGE).fetch()).hasSize(5).all {
                 get { this.conversationId }.isEqualTo(conversationId)
             }
@@ -244,13 +271,13 @@ class LLMManagerTest {
             mockGithubAPI.verify(
                 getRequestedFor(
                     urlMatching("/repos/my-owner/my-test-repo/git/trees/main.*"),
-                )
-                    .withQueryParam("recursive", equalTo("1")),
+                ).withQueryParam("recursive", equalTo("1")),
             )
 
             // check that the openAI API was used twice
 
-            val openAIRequests = mockOpenAIAPI.findAll(postRequestedFor(urlMatching("/v1/chat/completions.*")))
+            val openAIRequests =
+                mockOpenAIAPI.findAll(postRequestedFor(urlMatching("/v1/chat/completions.*")))
             expectThat(openAIRequests).hasSize(2).and {
                 // first request has the system prompt AND the information about the repo
                 get { this[0].bodyAsString }
@@ -277,31 +304,35 @@ class LLMManagerTest {
                 )
             val objectMapper = ObjectMapper()
             // see resources/openai-api/pr-data-response.json
-            expectThat(result).isA<LLMPullRequestData>().get { objectMapper.valueToTree<JsonNode>(this) }.isEqualToJson(
-                """
-                {
-                  "pullRequestBody": "I have made some changes to address the issue",
-                  "pullRequestTitle": "Create greeter function",
-                  "updatedFiles": [
+            expectThat(result)
+                .isA<LLMPullRequestData>()
+                .get { objectMapper.valueToTree<JsonNode>(this) }
+                .isEqualToJson(
+                    """
                     {
-                      "type": "CREATE",
-                      "filePath": "src/weather_app/main.py",
-                      "newContents": "def greet(name):\n\tprint(f'hello {name}')"
-                    },
-                    {
-                      "type": "CREATE",
-                      "filePath": "test/weather_app/test_main.py",
-                      "newContents": "assert(greet('steve') == 'hello steve')"
+                      "pullRequestBody": "I have made some changes to address the issue",
+                      "pullRequestTitle": "Create greeter function",
+                      "updatedFiles": [
+                        {
+                          "type": "CREATE",
+                          "filePath": "src/weather_app/main.py",
+                          "newContents": "def greet(name):\n\tprint(f'hello {name}')"
+                        },
+                        {
+                          "type": "CREATE",
+                          "filePath": "test/weather_app/test_main.py",
+                          "newContents": "assert(greet('steve') == 'hello steve')"
+                        }
+                      ]
                     }
-                  ]
-                }
-                """.trimIndent(),
-            )
+                    """.trimIndent(),
+                )
         }
 
         @Test
         fun <T> `marks conversation as failed if first user message unsuccessful`() {
-            every<T> { client.performStructuredOutputQuery(any()) } throws PromptRefusedException("naughty naughty")
+            every<T> { client.performStructuredOutputQuery(any()) } throws
+                PromptRefusedException("naughty naughty")
             val repoName = "my-owner/my-test-repo"
             prepareTestEnv(repoName)
             expectThrows<Exception> {
@@ -323,7 +354,11 @@ class LLMManagerTest {
 
             // check that there are 2 recorded messages (system prompt, 1st user, FAIL)
             expectThat(
-                ctx.selectFrom(LLM_MESSAGE).orderBy(LLM_MESSAGE.CREATED_AT).fetch().map { it.role },
+                ctx
+                    .selectFrom(LLM_MESSAGE)
+                    .orderBy(LLM_MESSAGE.CREATED_AT)
+                    .fetch()
+                    .map { it.role },
             ).containsExactly(
                 LlmMessageRole.SYSTEM,
                 LlmMessageRole.USER,
@@ -349,19 +384,21 @@ class LLMManagerTest {
                         number = 1,
                     ),
                 )
-            }.and {
-                get { this.message }.isNotNull()
-                    .contains("after 2nd user message")
-            }
+            }.and { get { this.message }.isNotNull().contains("after 2nd user message") }
             // check that conversation has been created but status is `failed`
             val foundConversations = ctx.selectFrom(LLM_CONVERSATION).fetch()
             expectThat(foundConversations).hasSize(1).and {
                 get { this.first().status }.isEqualTo(ConversationStatus.FAILED)
             }
 
-            // check that there are 4 recorded messages (system prompt, 1st user, assistant, 2nd user, FAIL)
+            // check that there are 4 recorded messages (system prompt, 1st user, assistant, 2nd user,
+            // FAIL)
             expectThat(
-                ctx.selectFrom(LLM_MESSAGE).orderBy(LLM_MESSAGE.CREATED_AT).fetch().map { it.role },
+                ctx
+                    .selectFrom(LLM_MESSAGE)
+                    .orderBy(LLM_MESSAGE.CREATED_AT)
+                    .fetch()
+                    .map { it.role },
             ).containsExactly(
                 LlmMessageRole.SYSTEM,
                 LlmMessageRole.USER,
@@ -384,17 +421,18 @@ class LLMManagerTest {
                 ),
             )
             // check that the conversation has been created
-            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch()).hasSize(1).get { this.first() }.and {
-                get { this.issueId }.isEqualTo(1)
-                get { this.repoId }.isEqualTo(repoId)
-                get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
-            }
+            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch())
+                .hasSize(1)
+                .get { this.first() }
+                .and {
+                    get { this.issueId }.isEqualTo(1)
+                    get { this.repoId }.isEqualTo(repoId)
+                    get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
+                }
             // get the system prompt - there is only ever one per conversation
 
             val systemPrompt =
-                ctx.selectFrom(LLM_MESSAGE)
-                    .where(LLM_MESSAGE.ROLE.eq(LlmMessageRole.SYSTEM))
-                    .fetchOne()
+                ctx.selectFrom(LLM_MESSAGE).where(LLM_MESSAGE.ROLE.eq(LlmMessageRole.SYSTEM)).fetchOne()
 
             expectThat(systemPrompt?.content).withNotNull {
                 this.isEqualTo(
@@ -423,15 +461,20 @@ class LLMManagerTest {
                 ),
             )
             // check that the conversation has been created
-            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch()).hasSize(1).get { this.first() }.and {
-                get { this.issueId }.isEqualTo(1)
-                get { this.repoId }.isEqualTo(repoId)
-                get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
-            }
-            // get the message that is meant to have the initial data in (first message with the USER role)
+            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch())
+                .hasSize(1)
+                .get { this.first() }
+                .and {
+                    get { this.issueId }.isEqualTo(1)
+                    get { this.repoId }.isEqualTo(repoId)
+                    get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
+                }
+            // get the message that is meant to have the initial data in (first message with the USER
+            // role)
 
             val repoInfoMessage =
-                ctx.selectFrom(LLM_MESSAGE)
+                ctx
+                    .selectFrom(LLM_MESSAGE)
                     .where(LLM_MESSAGE.ROLE.eq(LlmMessageRole.USER))
                     .orderBy(LLM_MESSAGE.CREATED_AT.asc())
                     .limit(1)
@@ -490,15 +533,20 @@ class LLMManagerTest {
                 ),
             )
             // check that the conversation has been created
-            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch()).hasSize(1).get { this.first() }.and {
-                get { this.issueId }.isEqualTo(1)
-                get { this.repoId }.isEqualTo(repoId)
-                get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
-            }
-            // get the message that is meant to have the file blobs in (second and last message with the USER role)
+            expectThat(ctx.selectFrom(LLM_CONVERSATION).fetch())
+                .hasSize(1)
+                .get { this.first() }
+                .and {
+                    get { this.issueId }.isEqualTo(1)
+                    get { this.repoId }.isEqualTo(repoId)
+                    get { this.status }.isEqualTo(ConversationStatus.COMPLETED)
+                }
+            // get the message that is meant to have the file blobs in (second and last message with the
+            // USER role)
 
             val fileBlobMessage =
-                ctx.selectFrom(LLM_MESSAGE)
+                ctx
+                    .selectFrom(LLM_MESSAGE)
                     .where(LLM_MESSAGE.ROLE.eq(LlmMessageRole.USER))
                     .orderBy(LLM_MESSAGE.CREATED_AT.desc())
                     .limit(1)

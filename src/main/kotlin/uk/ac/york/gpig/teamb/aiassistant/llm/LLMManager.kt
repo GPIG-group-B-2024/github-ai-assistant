@@ -16,13 +16,10 @@ import uk.ac.york.gpig.teamb.aiassistant.llm.responseSchemas.LLMPullRequestData
 import uk.ac.york.gpig.teamb.aiassistant.utils.types.WebhookPayload.Issue
 import uk.ac.york.gpig.teamb.aiassistant.vcs.VCSManager
 
-/**
- * Handles interactions with the OpenAI API
- * */
+/** Handles interactions with the OpenAI API */
 @Service
 class LLMManager(
-    @Value("\${app_settings.chatgpt_version:gpt-4o-2024-08-06}")
-    private val chatGptVersion: String,
+    @Value("\${app_settings.chatgpt_version:gpt-4o-2024-08-06}") private val chatGptVersion: String,
     private val client: OpenAIClient,
     private val c4Manager: C4Manager,
     private val conversationManager: LLMConversationManager,
@@ -103,9 +100,7 @@ class LLMManager(
 
     private val logger = LoggerFactory.getLogger(this::class.java)
 
-    /**
-     * Walk through the conversation flow outlined in the issue description
-     * */
+    /** Walk through the conversation flow outlined in the issue description */
     fun produceIssueSolution(
         repoName: String,
         issue: Issue,
@@ -138,7 +133,10 @@ class LLMManager(
                     )
                 conversationManager.addMessageToConversation(conversationId, initialMessage)
                 conversationId
-            } ?: throw Exception("Could not initiate conversation about issue ${issue.number} in repo $repoName")
+            }
+                ?: throw Exception(
+                    "Could not initiate conversation about issue ${issue.number} in repo $repoName",
+                )
 
         // make first request: we should get a list of files back
         val filesToInspectInFull =
@@ -149,7 +147,9 @@ class LLMManager(
             } catch (e: Exception) {
                 logger.error("Marking conversation $conversationId as failed after 1st user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error after 1st user message: $e ")
+                throw Exception(
+                    "LLM query in conversation $conversationId failed with error after 1st user message: $e ",
+                )
             }
 
         // store chatGPT's response into the database
@@ -187,9 +187,12 @@ class LLMManager(
             } catch (e: Exception) {
                 logger.error("Marking conversation $conversationId as failed after 2nd user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error after 2nd user message: $e ")
+                throw Exception(
+                    "LLM query in conversation $conversationId failed with error after 2nd user message: $e ",
+                )
             }
-        // we have received the pull request data. Write the remaining message to the database, mark the conversation as complete and return the data.
+        // we have received the pull request data. Write the remaining message to the database, mark the
+        // conversation as complete and return the data.
         transactionTemplate.execute {
             conversationManager.addMessageToConversation(
                 conversationId,

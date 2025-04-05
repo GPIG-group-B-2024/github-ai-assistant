@@ -12,9 +12,7 @@ import uk.ac.york.gpig.teamb.aiassistant.vcs.entities.FileBlob
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.git.GitFacade
 import uk.ac.york.gpig.teamb.aiassistant.vcs.facades.github.GitHubFacade
 
-/**
- * Manages the response to issues: interacts with the git repository and creates pull requests
- * */
+/** Manages the response to issues: interacts with the git repository and creates pull requests */
 @Service
 class VCSManager(
     val gitFacade: GitFacade,
@@ -35,7 +33,9 @@ class VCSManager(
 
     fun processNewIssueComment(payload: WebhookPayload) {
         val (issue, _, repository, comment) = payload
-        if (comment.user.login != "gpig-ai-assistant[bot]") { // TODO add login to config instead of hardcoding
+        if (comment.user.login !=
+            "gpig-ai-assistant[bot]"
+        ) { // TODO add login to config instead of hardcoding
             logger.info("Processing comment ${comment.id} on issue ${issue.number}")
             gitHubFacade.createComment(
                 repository.fullName,

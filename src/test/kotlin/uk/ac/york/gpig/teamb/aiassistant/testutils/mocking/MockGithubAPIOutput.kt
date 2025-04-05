@@ -11,8 +11,9 @@ object MockGithubAPIOutput {
     /**
      * Construct a mock github API response simulating a request for the contents of a given file.
      *
-     * Example output taken from https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
-     * */
+     * Example output taken from
+     * https://docs.github.com/en/rest/repos/contents?apiVersion=2022-11-28#get-repository-content
+     */
     @OptIn(ExperimentalEncodingApi::class)
     fun mockGithubAPIBlob(
         filename: String,
@@ -20,7 +21,8 @@ object MockGithubAPIOutput {
     ): String {
         val objectMapper = ObjectMapper()
         // grab the json file and parse it into a Json node
-        val initialResponseString = File("src/test/resources/wiremock/github-api/file-contents-output.json").readText()
+        val initialResponseString =
+            File("src/test/resources/wiremock/github-api/file-contents-output.json").readText()
         val initialResponseJson = objectMapper.readValue(initialResponseString, JsonNode::class.java)
 
         val expectedContentEncoded = Base64.encode(expectedContent.toByteArray())
