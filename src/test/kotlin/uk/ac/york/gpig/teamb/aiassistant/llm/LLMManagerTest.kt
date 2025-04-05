@@ -150,9 +150,10 @@ class LLMManagerTest {
                             mockGithubAPIBlob(
                                 path,
                                 """
+                                # i am $path and this is some cool python code:
                                 def greet(name):
                                     return f'Hello, {name}!'
-                                """.trimIndent(),
+                                """,
                             ),
                         ),
                     ),
@@ -516,8 +517,11 @@ class LLMManagerTest {
                 |
                 |                    ## src/weather_app/main.py
                 |                    ```
-                |                    def greet(name):
-                |    return f'Hello, {name}!'
+                |                    
+                |                                # i am src/weather_app/main.py and this is some cool python code:
+                |                                def greet(name):
+                |                                    return f'Hello, {name}!'
+                |                                
                 |                    ```
                 |                    ---
                 |                    
@@ -525,8 +529,11 @@ class LLMManagerTest {
                 |
                 |                    ## test/weather_app/test_main.py
                 |                    ```
-                |                    def greet(name):
-                |    return f'Hello, {name}!'
+                |                    
+                |                                # i am test/weather_app/test_main.py and this is some cool python code:
+                |                                def greet(name):
+                |                                    return f'Hello, {name}!'
+                |                                
                 |                    ```
                 |                    ---
                 |                    
