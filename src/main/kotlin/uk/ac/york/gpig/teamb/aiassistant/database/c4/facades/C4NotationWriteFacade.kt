@@ -80,4 +80,49 @@ class C4NotationWriteFacade(
                 .execute() == 1
         if (!success) throw DatabaseOperationException("Failed to link repository $repoName with workspace $workspaceId")
     }
+
+    fun removeLinkToWorkspace(
+        repoName: String,
+        workspaceId: UUID,
+    ) = ctx.update(GITHUB_REPOSITORY)
+        .setNull(GITHUB_REPOSITORY.WORKSPACE_ID)
+        .where(
+            GITHUB_REPOSITORY.FULL_NAME.eq(repoName)
+                .and(GITHUB_REPOSITORY.WORKSPACE_ID.eq(workspaceId)),
+        ).execute().let { updateCount ->
+            if (updateCount != 1) {
+                throw DatabaseOperationException(
+                    "Failed to remove link between repository $repoName and workspace $workspaceId",
+                )
+            }
+        }
+
+    fun deleteWorkspace(workspaceId: UUID) =
+        ctx.deleteFrom(WORKSPACE)
+            .where(WORKSPACE.ID.eq(workspaceId))
+            .execute().let { deleteCount ->
+                if (deleteCount != 1) {
+                    throw DatabaseOperationException("Failed to delete workspace $workspaceId")
+                }
+            }
+
+    /**
+     * Delete all c4 members associated with a given workspace
+     *
+     * @return The number of deleted entities
+     * */
+    fun deleteWorkspaceMembers(workspaceId: UUID): Int =
+        ctx.deleteFrom(MEMBER)
+            .where(MEMBER.WORKSPACE_ID.eq(workspaceId))
+            .execute()
+
+    /**
+     * Delete all c4 relationships associated with a given workspace
+     *
+     * @return The number of deleted relationships
+     * */
+    fun deleteWorkspaceRelationships(workspaceId: UUID): Int =
+        ctx.deleteFrom(RELATIONSHIP)
+            .where(RELATIONSHIP.WORKSPACE_ID.eq(workspaceId))
+            .execute()
 }

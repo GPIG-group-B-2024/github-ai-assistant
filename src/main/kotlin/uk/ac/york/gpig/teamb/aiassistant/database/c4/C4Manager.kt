@@ -174,7 +174,8 @@ class C4Manager(
     /**
      * For manual app operation/testing: create record of a github repo and associate a structurizr workspace with it.
      *
-     * > If the repo does not exist in the system, this method will create a new record.
+     * - If the repo does not exist in the system, this method will create a new record.
+     * - If both the repo and the workspace exist, the operation will __completely__ overwrite it
      *
      * @param rawStructurizr The structurizr code representing the repo. __Must__ be valid.
      * */
@@ -192,7 +193,22 @@ class C4Manager(
         } else {
             logger.info("Repository with name $repoName already exists, skipping creation step...")
         }
-        // Step 2: process the structurizr payload and link to the repo
+        // Step 2: check if there is a workspace associated with this repo
+        val workspaceId = c4NotationReadFacade.getRepositoryWorkspace(repoName)?.id
+        if (workspaceId != null) {
+            logger.info("Found workspace associated with repo $repoName. Deleting...")
+            c4NotationWriteFacade.deleteWorkspaceRelationships(workspaceId).let {
+                logger.info("Deleted $it relationships from workspace $workspaceId")
+            }
+            c4NotationWriteFacade.deleteWorkspaceMembers(workspaceId).let {
+                logger.info("Deleted $it members from workspace $workspaceId")
+            }
+            c4NotationWriteFacade.removeLinkToWorkspace(repoName, workspaceId)
+            logger.info("Removed link between repo $repoName and workspace $workspaceId")
+            c4NotationWriteFacade.deleteWorkspace(workspaceId)
+            logger.info("Deleted workspace $workspaceId")
+        }
+        // Step 3: process the structurizr payload and link to the repo
         consumeStructurizrWorkspace(repoName, rawStructurizr)
     }
 

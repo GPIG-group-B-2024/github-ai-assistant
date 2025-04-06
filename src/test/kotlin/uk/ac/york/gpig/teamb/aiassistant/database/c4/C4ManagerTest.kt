@@ -6,13 +6,17 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import strikt.api.expect
 import strikt.api.expectThat
 import strikt.api.expectThrows
+import strikt.assertions.contains
 import strikt.assertions.containsExactlyInAnyOrder
+import strikt.assertions.doesNotContain
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
 import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import strikt.assertions.none
 import strikt.assertions.withNotNull
 import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.NotFoundException.NotFoundByNameException
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
@@ -350,6 +354,122 @@ class C4ManagerTest {
 
             expectThat(fetchRepoResult).withNotNull {
                 get { this.workspaceId }.isEqualTo(workspaceId?.get(WORKSPACE.ID))
+            }
+        }
+
+        @Test
+        fun `handles repo AND workspace already existing`() {
+            val workspaceId = UUID.randomUUID()
+            val repoName = "my-fancy-repo"
+            val repoUrl = "https://github.com/some-coder/my-weather-app"
+            val parentId = UUID.randomUUID()
+            val repoComponentId = UUID.randomUUID()
+            val controllerComponentId = UUID.randomUUID()
+            val loggerComponentId = UUID.randomUUID()
+            val rawStructurizr =
+                """
+                workspace "My-weather-app" "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data."{
+                !impliedRelationships false
+                model {
+                    u = person "User"
+                    ss = softwareSystem "Software System" {
+                        wa = container "Web Application" {
+                            cont = component "Controllers"
+                            dba = component "Database Access"
+                            serviceLayer = component "Business logic"
+                        }
+                        db = container "Database Schema" {
+                            tags "Database"
+                        }
+                    }
+                    wa -> db "Reads from and writes to"
+                    serviceLayer -> dba "Converts raw database output to easy-to-read JSON"
+                    cont -> u "Send and receive HTTP traffic"
+                    cont -> serviceLayer "Calls functions corresponding to user requests"
+                    dba -> db "Compiles and executes queries"
+
+                }
+                }
+                """.trimIndent()
+            // Create an existing repo AND a workspace with some members and relationships
+
+            gitRepo {
+                this.fullName = repoName
+                this.url = repoUrl
+                this.workspace {
+                    this.id = workspaceId
+                }
+            }.create(ctx)
+
+            member {
+                this.id = parentId
+                this.workspace { this.id = workspaceId }
+                this.name = "my-software-system"
+            }.create(ctx)
+
+            relationship {
+                this.workspace {
+                    this.id = workspaceId
+                }
+                this.startMember {
+                    this.name = "my-OLD-controller"
+                    this.id = controllerComponentId
+                    this.workspace { this.id = workspaceId }
+                    this.parentId = parentId
+                    this.description = "handles HTTP requests"
+                }
+                this.endMember {
+                    this.name = "my-OLD-repository"
+                    this.id = repoComponentId
+                    this.workspace { this.id = workspaceId }
+                    this.parentId = parentId
+                    this.description = "handles database access"
+                }
+                this.description = "some cool relationship"
+            }.create(ctx)
+
+            member {
+                this.id = loggerComponentId
+                this.name = "logger"
+                this.workspace { this.id = workspaceId }
+                this.parentId = repoComponentId
+                this.description = "prints error traces to stderr"
+            }.create(ctx)
+
+            // act
+            sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
+
+            // Step 1: check that none of the old components remain
+            val componentIds = ctx.select(MEMBER.ID).from(MEMBER).fetch().map { it.get(MEMBER.ID) }
+            val componentNames = ctx.select(MEMBER.NAME).from(MEMBER).fetch().map { it.get(MEMBER.NAME) }
+            expect {
+                that(componentIds).doesNotContain(
+                    controllerComponentId,
+                    repoComponentId,
+                    loggerComponentId,
+                )
+                that(componentNames).none { contains("OLD") }
+            }
+
+            // Step 2: Check workspace was created and linked
+            // 2.1: Check there is one workspace
+            expectThat(ctx.fetchCount(WORKSPACE)).isEqualTo(1)
+            // 2.2: Check the workspace's name and description matches the provided structurizr
+            val readWorkspacesResult = ctx.selectFrom(WORKSPACE).fetchOne()
+            expectThat(readWorkspacesResult).withNotNull {
+                get { this.name }.isEqualTo("My-weather-app")
+                get { this.description }.isEqualTo(
+                    "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
+                )
+            }
+            // 2.3 Check that the workspace was linked correctly (inspect the repo's foreign key)
+            val readReposResult = ctx.selectFrom(GITHUB_REPOSITORY).fetchOne()
+            expectThat(readReposResult).withNotNull {
+                get { this.fullName }.isEqualTo(repoName)
+                get { this.url }.isEqualTo("https://github.com/some-coder/my-weather-app")
+            }
+            expectThat(readReposResult).withNotNull {
+                get { this.workspaceId }.isNotNull().isEqualTo(readWorkspacesResult?.id)
             }
         }
     }
