@@ -78,8 +78,12 @@ class LLMManager(
         )
 
     private val logger = LoggerFactory.getLogger(this::class.java)
+
     /**
      * Attempt to perform a structured output query, running some code on failure before re-throwing the exception
+     *
+     * @param onFailure The code to run when the request fails. Takes in the exception as the argument.
+     * Note: must never return i.e. must re-throw the exception in the end of execution
      * */
     private fun <TResponse : Any> trySendMessageOrElse(
         // the message to send
