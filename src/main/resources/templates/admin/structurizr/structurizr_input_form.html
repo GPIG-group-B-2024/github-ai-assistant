@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html
+        lang="en"
+        xmlns:th="http://www.thymeleaf.org"
+        xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity6"
+>
+<head>
+    <title>Admin dashboard</title>
+</head>
+<link rel="stylesheet" type="text/css" th:href="@{/css/main.css}" />
+<link rel="stylesheet" type="text/css" th:href="@{/css/manual_structurizr_form.css}" />
+<link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+/>
+<body>
+<div class="header-container">
+    <h2>
+        Manual Structurizr input
+    </h2>
+    <div class="profile-info" sec:authorize="isAuthenticated()">
+        <img
+                th:src="${profile.get('picture')}"
+                th:attr="alt=${profile.get('name')}"
+        />
+        <div class="email-logout">
+            <p th:text="${profile.get('name')}"></p>
+            <form name="logoutForm" th:action="@{/logout}" method="post">
+                <button type="submit">Log out</button>
+            </form>
+        </div>
+    </div>
+</div>
+<div class="structurizr-form-container">
+    <form>
+        <label for="repoUrl">Repo URL</label>
+        <input id="repoUrl" type="text" value="Repo URL"/>
+        <br>
+        <label for="repoName">Repo full name</label>
+        <input id="repoName" type="text" value="Repo Name"/>
+        <br>
+        <label for="rawStructurizr">New structurizr workspace</label>
+        <textarea id="rawStructurizr" >
+            Structurizr goes here
+        </textarea>
+        <br>
+        <input type="button" value="Submit" />
+    </form>
+</div>
+</body>
+</html>
