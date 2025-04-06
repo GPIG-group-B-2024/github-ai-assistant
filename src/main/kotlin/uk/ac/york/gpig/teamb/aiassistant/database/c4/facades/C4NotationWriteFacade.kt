@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4ElementEntity
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4RelationshipEntity
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4WorkspaceEntity
+import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.DatabaseOperationException
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.GITHUB_REPOSITORY
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.MEMBER
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.RELATIONSHIP
@@ -27,7 +28,7 @@ class C4NotationWriteFacade(
                     entities.map { DSL.row(it.id, it.name, it.description, it.parentId, it.type, it.workspaceId) },
                 )
                 .execute() == entities.size
-        if (!success) throw Exception("Failed to write entity records")
+        if (!success) throw DatabaseOperationException("Failed to write entity records")
     }
 
     fun writeRelationshipsList(relationships: List<C4RelationshipEntity>) {
@@ -45,7 +46,7 @@ class C4NotationWriteFacade(
                     },
                 )
                 .execute() == relationships.size
-        if (!success) throw Exception("Failed to write relationships list")
+        if (!success) throw DatabaseOperationException("Failed to write relationships list")
     }
 
     fun writeWorkspace(workspace: C4WorkspaceEntity) {
@@ -54,8 +55,19 @@ class C4NotationWriteFacade(
                 .columns(WORKSPACE.ID, WORKSPACE.NAME, WORKSPACE.DESCRIPTION)
                 .values(workspace.id, workspace.name, workspace.description)
                 .execute() == 1
-        if (!success) throw Exception("Failed to write workspace record with id ${workspace.id} (${workspace.name})")
+        if (!success) throw DatabaseOperationException("Failed to write workspace record with id ${workspace.id} (${workspace.name})")
     }
+
+    fun writeRepository(
+        repoId: UUID,
+        repoName: String,
+        repoUrl: String,
+    ) = ctx.insertInto(GITHUB_REPOSITORY)
+        .columns(GITHUB_REPOSITORY.ID, GITHUB_REPOSITORY.FULL_NAME, GITHUB_REPOSITORY.URL)
+        .values(repoId, repoName, repoUrl)
+        .execute().let { insertCount ->
+            if (insertCount != 1) throw DatabaseOperationException("Failed to write github repository with name $repoName")
+        }
 
     fun linkRepoToWorkspace(
         repoName: String,
@@ -66,6 +78,6 @@ class C4NotationWriteFacade(
                 .set(GITHUB_REPOSITORY.WORKSPACE_ID, workspaceId)
                 .where(GITHUB_REPOSITORY.FULL_NAME.eq(repoName))
                 .execute() == 1
-        if (!success) throw Exception("Failed to link repository $repoName with workspace $workspaceId")
+        if (!success) throw DatabaseOperationException("Failed to link repository $repoName with workspace $workspaceId")
     }
 }

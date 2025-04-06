@@ -3,6 +3,7 @@ package uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.facades
 import org.jooq.DSLContext
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
+import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.DatabaseOperationException
 import uk.ac.york.gpig.teamb.aiassistant.enums.ConversationStatus
 import uk.ac.york.gpig.teamb.aiassistant.enums.LlmMessageRole
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.CONVERSATION_MESSAGE
@@ -26,7 +27,7 @@ class LLMConversationWriteFacade(
         .columns(CONVERSATION_MESSAGE.CONVERSATION_ID, CONVERSATION_MESSAGE.MESSAGE_ID)
         .values(conversationId, messageId)
         .execute().let { insertCount ->
-            if (insertCount != 1) throw Exception("Failed to link message $messageId to conversation $conversationId")
+            if (insertCount != 1) throw DatabaseOperationException("Failed to link message $messageId to conversation $conversationId")
         }
 
     /**
@@ -45,7 +46,7 @@ class LLMConversationWriteFacade(
         )
         .values(id, role, content, OffsetDateTime.now())
         .execute().let { insertCount ->
-            if (insertCount != 1) throw Exception("Failed to store message $id")
+            if (insertCount != 1) throw DatabaseOperationException("Failed to store message $id")
         }
 
     fun updateStatus(
@@ -56,7 +57,7 @@ class LLMConversationWriteFacade(
         .where(LLM_CONVERSATION.ID.eq(id))
         .execute()
         .let { updateCount ->
-            if (updateCount != 1) throw Exception("Failed to update status of conversation $id")
+            if (updateCount != 1) throw DatabaseOperationException("Failed to update status of conversation $id")
         }
 
     /**
@@ -76,6 +77,6 @@ class LLMConversationWriteFacade(
         )
         .values(id, repoId, issueId, OffsetDateTime.now(), ConversationStatus.IN_PROGRESS)
         .execute().let { insertCount ->
-            if (insertCount != 1) throw Exception("Failed to store conversation $id")
+            if (insertCount != 1) throw DatabaseOperationException("Failed to store conversation $id")
         }
 }

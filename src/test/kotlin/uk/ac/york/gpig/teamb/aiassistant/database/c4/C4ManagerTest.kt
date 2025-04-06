@@ -1,5 +1,6 @@
 package uk.ac.york.gpig.teamb.aiassistant.database.c4
 
+import com.structurizr.dsl.StructurizrDslParserException
 import org.jooq.DSLContext
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -10,7 +11,9 @@ import strikt.api.expectThrows
 import strikt.assertions.containsExactlyInAnyOrder
 import strikt.assertions.hasSize
 import strikt.assertions.isEqualTo
+import strikt.assertions.isNotNull
 import strikt.assertions.isTrue
+import strikt.assertions.withNotNull
 import uk.ac.york.gpig.teamb.aiassistant.database.exceptions.NotFoundException.NotFoundByNameException
 import uk.ac.york.gpig.teamb.aiassistant.enums.MemberType
 import uk.ac.york.gpig.teamb.aiassistant.tables.references.GITHUB_REPOSITORY
@@ -214,6 +217,139 @@ class C4ManagerTest {
                 )
             }.and {
                 get { this.message }.isEqualTo("Could not find github repository with name \"unknown-repo\"")
+            }
+        }
+    }
+
+    @Nested
+    @DisplayName("Tests for initialising a github repo with a structurizr workspace")
+    inner class InitialiseRepoTest {
+        @Test
+        fun `smoke test`() {
+            val rawStructurizr =
+                """
+                workspace "My-weather-app" "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data."{
+                !impliedRelationships false
+                model {
+                    u = person "User"
+                    ss = softwareSystem "Software System" {
+                        wa = container "Web Application" {
+                            cont = component "Controllers"
+                            dba = component "Database Access"
+                            serviceLayer = component "Business logic"
+                        }
+                        db = container "Database Schema" {
+                            tags "Database"
+                        }
+                    }
+                    wa -> db "Reads from and writes to"
+                    serviceLayer -> dba "Converts raw database output to easy-to-read JSON"
+                    cont -> u "Send and receive HTTP traffic"
+                    cont -> serviceLayer "Calls functions corresponding to user requests"
+                    dba -> db "Compiles and executes queries"
+
+                }
+                }
+                """.trimIndent()
+            val repoName = "some-coder/my-weather-app"
+            val repoUrl = "https://github.com/some-coder/my-weather-app"
+
+            sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
+
+            // Step 1: Check repo was created
+            // 1.1: Check there is one repo
+            expectThat(ctx.fetchCount(GITHUB_REPOSITORY)).isEqualTo(1)
+            // 1.2: Check that the data is correct
+            val readReposResult = ctx.selectFrom(GITHUB_REPOSITORY).fetchOne()
+            expectThat(readReposResult).withNotNull {
+                get { this.fullName }.isEqualTo("some-coder/my-weather-app")
+                get { this.url }.isEqualTo("https://github.com/some-coder/my-weather-app")
+            }
+
+            // Step 2: Check workspace was created and linked
+            // 2.1: Check there is one workspace
+            expectThat(ctx.fetchCount(WORKSPACE)).isEqualTo(1)
+            // 2.2: Check the workspace's name and description matches the provided structurizr
+            val readWorkspacesResult = ctx.selectFrom(WORKSPACE).fetchOne()
+            expectThat(readWorkspacesResult).withNotNull {
+                get { this.name }.isEqualTo("My-weather-app")
+                get { this.description }.isEqualTo(
+                    "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
+                )
+            }
+            // 2.3 Check that the workspace was linked correctly (inspect the repo's foreign key)
+            expectThat(readReposResult).withNotNull {
+                get { this.workspaceId }.isNotNull().isEqualTo(readWorkspacesResult?.id)
+            }
+
+            // Checking the actual parsing is done elsewhere
+        }
+
+        @Test
+        fun `throws for bad structurizr`() {
+            val rawStructurizr =
+                """
+                I AM SOME BAD STRUCTURIZR CODE!!! {{{{
+                """.trimIndent()
+            val repoName = "some-coder/my-weather-app"
+            val repoUrl = "https://github.com/some-coder/my-weather-app"
+            expectThrows<StructurizrDslParserException> {
+                sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
+            }.and {
+                get { this.localizedMessage }
+                    .isEqualTo("Unexpected tokens (expected: workspace) at line 1: I AM SOME BAD STRUCTURIZR CODE!!! {{{{")
+            }
+
+            // check that repo was not created
+
+            expectThat(ctx.fetchCount(GITHUB_REPOSITORY)).isEqualTo(0)
+        }
+
+        @Test
+        fun `handles repo already existing`() {
+            val repoName = "some-coder/my-weather-app"
+            val repoUrl = "https://github.com/some-coder/my-weather-app"
+            val rawStructurizr =
+                """
+                workspace "My-weather-app" "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data."{
+                !impliedRelationships false
+                model {
+                    u = person "User"
+                    ss = softwareSystem "Software System" {
+                        wa = container "Web Application" {
+                            cont = component "Controllers"
+                            dba = component "Database Access"
+                            serviceLayer = component "Business logic"
+                        }
+                        db = container "Database Schema" {
+                            tags "Database"
+                        }
+                    }
+                    wa -> db "Reads from and writes to"
+                    serviceLayer -> dba "Converts raw database output to easy-to-read JSON"
+                    cont -> u "Send and receive HTTP traffic"
+                    cont -> serviceLayer "Calls functions corresponding to user requests"
+                    dba -> db "Compiles and executes queries"
+
+                }
+                }
+                """.trimIndent()
+            gitRepo(createWorkspace = false) {
+                this.url = repoUrl
+                this.fullName = repoName
+            }.create(ctx)
+
+            sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
+
+            // check there is only one repo still
+            expectThat(ctx.fetchCount(GITHUB_REPOSITORY)).isEqualTo(1)
+            // check that there is one workspace
+            expectThat(ctx.fetchCount(WORKSPACE)).isEqualTo(1)
+            val workspaceId = ctx.select(WORKSPACE.ID).from(WORKSPACE).fetchOne()
+            val fetchRepoResult = ctx.selectFrom(GITHUB_REPOSITORY).fetchOne()
+
+            expectThat(fetchRepoResult).withNotNull {
+                get { this.workspaceId }.isEqualTo(workspaceId?.get(WORKSPACE.ID))
             }
         }
     }

@@ -1,12 +1,16 @@
 package uk.ac.york.gpig.teamb.aiassistant.database.c4
 
 import com.structurizr.dsl.StructurizrDslParser
+import com.structurizr.dsl.StructurizrDslParserException
 import com.structurizr.model.Component
 import com.structurizr.model.Container
+import com.structurizr.model.Element
 import com.structurizr.model.Person
+import com.structurizr.model.Relationship
 import com.structurizr.model.SoftwareSystem
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import org.springframework.transaction.support.TransactionTemplate
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.conversions.toStructurizrString
 import uk.ac.york.gpig.teamb.aiassistant.database.c4.entities.C4ElementEntity
@@ -56,13 +60,57 @@ class C4Manager(
     }
 
     /**
+     * Convert a `Parent id -> list of children` map to a list of c4 entities, preserving parent-child relationships.
+     * */
+    private fun Map<String?, List<Element>>.toEntityList(
+        workspaceId: UUID,
+        idMappings: Map<String, UUID>,
+    ) = this.flatMap {
+            (parentId, children) ->
+        val parentUUID = if (parentId != null) idMappings[parentId]!! else null
+        children.map {
+            C4ElementEntity(
+                id = idMappings[it.id]!!,
+                parentId = parentUUID,
+                type =
+                    when (it) {
+                        // structurizr parser doesn't store the type of elements
+                        // and instead casts them into different classes
+                        is Person -> MemberType.PERSON
+                        is SoftwareSystem -> MemberType.SOFTWARE_SYSTEM
+                        is Container -> MemberType.CONTAINER
+                        is Component -> MemberType.COMPONENT
+                        else -> throw IllegalArgumentException("Unknown member type: ${it::class.qualifiedName}")
+                    },
+                name = it.name,
+                description = it.description,
+                workspaceId = workspaceId,
+            )
+        }
+    }
+
+    private fun Set<Relationship>.toRelationshipEntityList(
+        workspaceId: UUID,
+        idMappings: Map<String, UUID>,
+    ) = this.map {
+        C4RelationshipEntity(
+            from = idMappings[it.sourceId]!!,
+            to = idMappings[it.destinationId]!!,
+            fromName = it.source.name,
+            toName = it.destination.name,
+            description = it.description,
+            workspaceId = workspaceId,
+        )
+    }
+
+    /**
      * Consumes a structurizr file representing a single workspace and stores result to database.
      * If the file is correct, the following entities will be created:
      *  * A `Member` for each C4 component
      *  * A `Relationship` for each relationship
      *  * A `Workspace` entity linked to the provided github repo name
      * */
-    fun consumeStructurizrWorkspace(
+    internal fun consumeStructurizrWorkspace(
         repoName: String,
         rawInput: String,
     ) {
@@ -73,7 +121,12 @@ class C4Manager(
         logger.info("Found repository with name $repoName")
 
         val parser = StructurizrDslParser()
-        parser.parse(rawInput)
+        try {
+            parser.parse(rawInput)
+        } catch (e: StructurizrDslParserException) {
+            logger.error("Error processing structurizr payload: ${e.localizedMessage}")
+            throw e
+        }
         logger.info("Successfully parsed structurizr input")
         val workspace = parser.workspace
         val workspaceId = UUID.randomUUID()
@@ -95,42 +148,10 @@ class C4Manager(
                 it.id
             }.associateWith { UUID.randomUUID() } // assign a unique UUID (to be stored in the database) to each discovered component
         // for each parentId (including null), create entities representing its children and associate them with the parent ID
-        val entities =
-            rawComponentHierarchy.flatMap {
-                    (parentId, children) ->
-                val parentUUID = if (parentId != null) stringIdToDbUUID[parentId]!! else null
-                children.map {
-                    C4ElementEntity(
-                        id = stringIdToDbUUID[it.id]!!,
-                        parentId = parentUUID,
-                        type =
-                            when (it) {
-                                // structurizr parser doesn't store the type of elements
-                                // and instead casts them into different classes
-                                is Person -> MemberType.PERSON
-                                is SoftwareSystem -> MemberType.SOFTWARE_SYSTEM
-                                is Container -> MemberType.CONTAINER
-                                is Component -> MemberType.COMPONENT
-                                else -> throw IllegalArgumentException("Unknown member type: ${it::class.qualifiedName}")
-                            },
-                        name = it.name,
-                        description = it.description,
-                        workspaceId = workspaceId,
-                    )
-                }
-            }
+        val entities = rawComponentHierarchy.toEntityList(workspaceId, stringIdToDbUUID)
 
         val relationships =
-            workspace.model.relationships.map {
-                C4RelationshipEntity(
-                    from = stringIdToDbUUID[it.sourceId]!!,
-                    to = stringIdToDbUUID[it.destinationId]!!,
-                    fromName = it.source.name,
-                    toName = it.destination.name,
-                    description = it.description,
-                    workspaceId = workspaceId,
-                )
-            }
+            workspace.model.relationships.toRelationshipEntityList(workspaceId, stringIdToDbUUID)
         logger.info("Found ${relationships.size} relationships")
 
         // write new entities to database and link the new workspace to github repo
@@ -153,14 +174,26 @@ class C4Manager(
     /**
      * For manual app operation/testing: create record of a github repo and associate a structurizr workspace with it.
      *
+     * > If the repo does not exist in the system, this method will create a new record.
+     *
      * @param rawStructurizr The structurizr code representing the repo. __Must__ be valid.
      * */
+    @Transactional(rollbackFor = [StructurizrDslParserException::class])
     fun initializeWorkspace(
         repoName: String,
         repoUrl: String,
         rawStructurizr: String,
     ) {
-        TODO()
+        // Step 1: check if repo exists and create a new one if not
+        if (!c4NotationReadFacade.checkRepositoryExists(repoName)) {
+            val repoId = UUID.randomUUID()
+            logger.info("Could not find repository with name $repoName, creating and assigning ID $repoId...")
+            c4NotationWriteFacade.writeRepository(repoId, repoName, repoUrl)
+        } else {
+            logger.info("Repository with name $repoName already exists, skipping creation step...")
+        }
+        // Step 2: process the structurizr payload and link to the repo
+        consumeStructurizrWorkspace(repoName, rawStructurizr)
     }
 
     /**
