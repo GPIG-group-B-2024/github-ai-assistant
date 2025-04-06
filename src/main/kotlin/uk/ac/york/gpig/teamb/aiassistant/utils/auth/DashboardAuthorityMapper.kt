@@ -27,9 +27,14 @@ class DashboardAuthorityMapper(
 
         @Suppress("UNCHECKED_CAST") // not ideal, but we know the format of this is consistent
         val assignedRoles = (oidcUser.attributes[groupsClaim] as List<String>).map(::SimpleGrantedAuthority)
-        val additionalPermissions = mutableListOf<SimpleGrantedAuthority>()
+        val additionalPermissions = mutableSetOf<SimpleGrantedAuthority>()
         val hasReadOnlyRole = assignedRoles.any { it.authority == "ROLE_ADMIN" || it.authority == "ROLE_GUEST" }
+        val isAdmin = assignedRoles.any { it.authority == "ROLE_ADMIN" }
         when {
+            isAdmin ->
+                additionalPermissions.addAll(
+                    listOf(SimpleGrantedAuthority("dashboard:view"), SimpleGrantedAuthority("structurizr:write")),
+                )
             hasReadOnlyRole -> additionalPermissions.add(SimpleGrantedAuthority("dashboard:view"))
         }
 

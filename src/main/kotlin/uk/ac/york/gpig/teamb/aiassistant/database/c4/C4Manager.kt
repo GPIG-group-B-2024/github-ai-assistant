@@ -151,6 +151,19 @@ class C4Manager(
         ) ?: throw NotFoundException.NotFoundByNameException(repoName, "github repo")
 
     /**
+     * For manual app operation/testing: create record of a github repo and associate a structurizr workspace with it.
+     *
+     * @param rawStructurizr The structurizr code representing the repo. __Must__ be valid.
+     * */
+    fun initializeWorkspace(
+        repoName: String,
+        repoUrl: String,
+        rawStructurizr: String,
+    ) {
+        TODO()
+    }
+
+    /**
      * Print a C4 entity and its children, if any, in a nested block
      *
      * @param memberToChildren map of parent ID -> children
