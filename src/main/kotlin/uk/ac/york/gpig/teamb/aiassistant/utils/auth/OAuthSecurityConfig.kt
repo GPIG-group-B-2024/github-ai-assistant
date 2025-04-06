@@ -34,10 +34,10 @@ class OAuthSecurityConfig(
                 authorize(HttpMethod.GET, "/actuator/**", permitAll)
                 authorize(HttpMethod.POST, "/webhooks", permitAll)
                 // dashboard URL's
+                authorize(HttpMethod.POST, "/admin/structurizr/**", hasAuthority("structurizr:write"))
                 authorize(HttpMethod.GET, "/", hasAuthority("dashboard:view"))
                 authorize("/admin", hasAuthority("dashboard:view"))
                 authorize("/admin/**", hasAuthority("dashboard:view"))
-                authorize(HttpMethod.POST, "/admin/structurizr/**", hasAuthority("structurizr:write"))
                 authorize(HttpMethod.GET, "/error/**", permitAll) // let users see the pretty error page
                 // this is a standard practice, reject all requests to unknown URL's
                 authorize(anyRequest, denyAll)

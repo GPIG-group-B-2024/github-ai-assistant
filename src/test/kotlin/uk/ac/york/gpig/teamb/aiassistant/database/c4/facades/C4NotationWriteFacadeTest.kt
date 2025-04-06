@@ -270,7 +270,7 @@ class C4NotationWriteFacadeTest {
     @DisplayName("deleteWorkspaceRelationships()")
     inner class DeleteWorkspaceRelationshipsTest {
         @Test
-        fun `smoke test`()  {
+        fun `smoke test`() {
             // create a workspace with some members
             val workspaceId = UUID.randomUUID()
             workspace { id = workspaceId }.create(ctx)
@@ -299,7 +299,7 @@ class C4NotationWriteFacadeTest {
     @DisplayName("removeLinkToWorkspace()")
     inner class RemoveWorkspaceLinkTest {
         @Test
-        fun `smoke test`()  {
+        fun `smoke test`() {
             val workspaceId = UUID.randomUUID()
             val repoName = "some-coder/my-fancy-repo"
 
@@ -316,7 +316,7 @@ class C4NotationWriteFacadeTest {
         }
 
         @Test
-        fun `throws when workspace missing`()  {
+        fun `throws when workspace missing`() {
             val workspaceId = UUID.randomUUID()
             val repoName = "some-coder/my-fancy-repo"
 
@@ -330,7 +330,7 @@ class C4NotationWriteFacadeTest {
         }
 
         @Test
-        fun `throws when repo missing`()  {
+        fun `throws when repo missing`() {
             val workspaceId = UUID.randomUUID()
             val repoName = "some-coder/my-fancy-repo"
 

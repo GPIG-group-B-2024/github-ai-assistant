@@ -7,15 +7,19 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.http.MediaType
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository
 import org.springframework.security.oauth2.core.oidc.OidcIdToken
 import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oidcLogin
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import uk.ac.york.gpig.teamb.aiassistant.database.c4.C4Manager
 import uk.ac.york.gpig.teamb.aiassistant.database.llmConversation.LLMConversationManager
 import java.time.Instant
 
@@ -33,6 +37,10 @@ class OAuthSecurityConfigTest {
     @Suppress("UNUSED")
     @MockkBean(relaxed = true)
     private lateinit var clientRegistrationRepository: ClientRegistrationRepository
+
+    @Suppress("UNUSED")
+    @MockkBean(relaxed = true)
+    private lateinit var c4Manager: C4Manager
 
     @Test
     fun `should return 401 when accessing admin without authentication`() {
@@ -118,5 +126,56 @@ class OAuthSecurityConfigTest {
                 .with(oidcLogin().oidcUser(user)),
         )
             .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `returns 403 when accessing structurizr write endpoint with guest permissions`() {
+        val token =
+            OidcIdToken(
+                "mock-token",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                mapOf(
+                    "sub" to "12345",
+                    "email" to "my-user@funky-domain.co.uk",
+                ),
+            )
+        val user = DefaultOidcUser(listOf(SimpleGrantedAuthority("dashboard:view")), token)
+        mockMvc.perform(
+            post("/admin/structurizr/my-fancy-repo")
+                .with(csrf())
+                .with(oidcLogin().oidcUser(user)),
+        )
+            .andExpect(status().isForbidden)
+    }
+
+    @Test
+    fun `returns 200 when accessing structurizr write endpoint with admin permissions`() {
+        val token =
+            OidcIdToken(
+                "mock-token",
+                Instant.now(),
+                Instant.now().plusSeconds(3600),
+                mapOf(
+                    "sub" to "12345",
+                    "email" to "my-user@funky-domain.co.uk",
+                ),
+            )
+        val user = DefaultOidcUser(listOf(SimpleGrantedAuthority("structurizr:write"), SimpleGrantedAuthority("dashboard:view")), token)
+        mockMvc.perform(
+            post("/admin/structurizr/my-fancy-repo")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    """
+                    {
+                    "repo_url": "my-fancy-repo",
+                    "raw_structurizr": "workspace \"my-workspace\"{}"
+                    }
+                    """.trimIndent(),
+                )
+                .with(csrf())
+                .with(oidcLogin().oidcUser(user)),
+        )
+            .andExpect(status().isOk)
     }
 }
