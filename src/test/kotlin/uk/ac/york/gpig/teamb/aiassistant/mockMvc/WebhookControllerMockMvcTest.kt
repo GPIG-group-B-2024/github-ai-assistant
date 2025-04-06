@@ -219,21 +219,21 @@ class WebhookControllerMockMvcTest {
             llmManager.produceIssueSolution(mockWebhook.repository.fullName, mockWebhook.issue)
             vcsManager.processChanges(mockWebhook.repository, mockWebhook.issue, mockPullRequestData)
         }
+    }
 
-        @Test
-        fun `missing x-github-event header and return bad request`() {
-            val mockSignature = createMockSignature(mockWebhook)
-            mockMvc.perform(
-                post(
-                    "/webhooks",
-                )
-                    .header("x-github-hook-installation-target-type", "integration")
-                    .header("x-hub-signature-256", mockSignature)
-                    .contentType(MediaType.APPLICATION_JSON).content(
-                        Gson().toJson(mockWebhook),
-                    ),
+    @Test
+    fun `missing x-github-event header and return bad request`() {
+        val mockSignature = createMockSignature(mockWebhook)
+        mockMvc.perform(
+            post(
+                "/webhooks",
             )
-                .andExpect(status().isBadRequest) // Expect 400 bad request
-        }
+                .header("x-github-hook-installation-target-type", "integration")
+                .header("x-hub-signature-256", mockSignature)
+                .contentType(MediaType.APPLICATION_JSON).content(
+                    Gson().toJson(mockWebhook),
+                ),
+        )
+            .andExpect(status().isBadRequest) // Expect 400 bad request
     }
 }
