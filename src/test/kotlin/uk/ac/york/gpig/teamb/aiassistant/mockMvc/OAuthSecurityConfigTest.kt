@@ -142,7 +142,7 @@ class OAuthSecurityConfigTest {
             )
         val user = DefaultOidcUser(listOf(SimpleGrantedAuthority("dashboard:view")), token)
         mockMvc.perform(
-            post("/admin/structurizr/my-fancy-repo")
+            post("/admin/structurizr")
                 .with(csrf())
                 .with(oidcLogin().oidcUser(user)),
         )
@@ -163,7 +163,7 @@ class OAuthSecurityConfigTest {
             )
         val user = DefaultOidcUser(listOf(SimpleGrantedAuthority("structurizr:write"), SimpleGrantedAuthority("dashboard:view")), token)
         mockMvc.perform(
-            post("/admin/structurizr/my-fancy-repo")
+            post("/admin/structurizr")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(
                     """

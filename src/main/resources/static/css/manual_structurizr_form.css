@@ -1,0 +1,42 @@
+.structurizr-form-container {
+  justify-content: center;
+}
+
+.structurizr-form {
+  display: grid;
+  column-count: 1;
+  gap: 1em;
+  width: 80%;
+  margin: auto;
+}
+
+.form-label {
+  font-size: 16pt;
+  color: white;
+  background-color: cornflowerblue;
+  padding: 5px;
+  border-radius: 5px;
+}
+
+.structurizr-submit-button {
+  cursor: pointer;
+  width: fit-content;
+  justify-self: center;
+  font-size: 16pt;
+  padding: 2px;
+}
+
+.structurizr-text-input {
+  border: 2px solid gray;
+  border-radius: 5px;
+  padding: 5px;
+}
+
+.structurizr-textarea {
+  resize: none;
+  border: 2px solid gray;
+  border-radius: 5px;
+  padding: 5px;
+  height: 45lh;
+  font-family: monospace;
+}
