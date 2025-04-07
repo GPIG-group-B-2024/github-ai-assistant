@@ -53,29 +53,37 @@
       >
         <label class="form-label" for="repoUrl">Repo URL</label>
         <input
-          class="structurizr-text-input"
+          th:class="'structurizr-text-input ' + ${#fields.hasErrors('repoUrl') ? 'input-invalid' : ''}"
           th:field="*{repoUrl}"
           id="repoUrl"
           type="text"
           value="Repo URL"
         />
-        <div th:errors="*{repoUrl}">Invalid URL</div>
+        <div
+          th:if="${#fields.hasErrors('repoUrl')}"
+          th:errors="*{repoUrl}"
+          class="error-message"
+        >
+          Invalid URL
+        </div>
         <label class="form-label" for="repoName">Repo full name</label>
         <input
-          class="structurizr-text-input"
+          th:class="'structurizr-text-input ' + ${#fields.hasErrors('repoName') ? 'input-invalid' : ''}"
           th:field="*{repoName}"
           id="repoName"
           type="text"
           value="Repo Name"
         />
-        <div th:if="${#fields.hasErrors('repoName')}" th:errors="*{repoName}">
-          Invalid Repo name
-        </div>
+        <div
+          th:if="${#fields.hasErrors('repoName')}"
+          th:errors="*{repoName}"
+          class="error-message"
+        ></div>
         <label class="form-label" for="rawStructurizr">
           New structurizr workspace</label
         >
         <textarea
-          class="structurizr-textarea"
+          th:class="'structurizr-textarea ' + ${#fields.hasErrors('rawStructurizr') ? 'input-invalid' : ''}"
           th:field="*{rawStructurizr}"
           id="rawStructurizr"
         >
@@ -84,9 +92,8 @@
         <div
           th:if="${#fields.hasErrors('rawStructurizr')}"
           th:errors="*{rawStructurizr}"
-        >
-          Invalid Structurizr snippet
-        </div>
+          class="error-message"
+        ></div>
         <input class="structurizr-submit-button" type="submit" value="Submit" />
       </form>
     </div>

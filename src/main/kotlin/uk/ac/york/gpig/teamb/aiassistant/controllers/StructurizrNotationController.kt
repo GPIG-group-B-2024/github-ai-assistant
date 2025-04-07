@@ -36,7 +36,7 @@ class StructurizrNotationController(
             }
             return "/admin/structurizr/structurizr_input_form"
         }
-        // c4Manager.initializeWorkspace(workspaceData.repoName!!, workspaceData.repoUrl!!, workspaceData.rawStructurizr!!)
+        c4Manager.initializeWorkspace(workspaceData.repoName, workspaceData.repoUrl, workspaceData.rawStructurizr)
         return "/admin/structurizr/structurizr_success"
     }
 
