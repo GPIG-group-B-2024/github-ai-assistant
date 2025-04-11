@@ -101,11 +101,12 @@ class LLMManager(
     private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
-     * Attempt to perform a structured output query, running some code on failure before re-throwing the exception
+     * Attempt to perform a structured output query, running some code on failure before re-throwing
+     * the exception
      *
-     * @param onFailure The code to run when the request fails. Takes in the exception as the argument.
-     * Note: must never return i.e. must re-throw the exception in the end of execution
-     * */
+     * @param onFailure The code to run when the request fails. Takes in the exception as the
+     *   argument. Note: must never return i.e. must re-throw the exception in the end of execution
+     */
     private fun <TResponse : Any> trySendMessageOrElse(
         // the message to send
         message: OpenAIStructuredRequestData<TResponse>,
@@ -118,9 +119,7 @@ class LLMManager(
             onFailure(e)
         }
 
-    /**
-     * Walk through the conversation flow outlined in the issue description
-     * */
+    /** Walk through the conversation flow outlined in the issue description */
     fun produceIssueSolution(
         repoName: String,
         issue: Issue,
@@ -163,7 +162,9 @@ class LLMManager(
             trySendMessageOrElse(firstRequestData) { e ->
                 logger.error("Marking conversation $conversationId as failed after 1st user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error after 1st user message: $e")
+                throw Exception(
+                    "LLM query in conversation $conversationId failed with error after 1st user message: $e",
+                )
             }
 
         // store chatGPT's response into the database
@@ -199,7 +200,9 @@ class LLMManager(
             ) { e ->
                 logger.error("Marking conversation $conversationId as failed after 2nd user message")
                 conversationManager.updateConversationStatus(conversationId, ConversationStatus.FAILED)
-                throw Exception("LLM query in conversation $conversationId failed with error after 2nd user message: $e ")
+                throw Exception(
+                    "LLM query in conversation $conversationId failed with error after 2nd user message: $e ",
+                )
             }
         // we have received the pull request data. Write the remaining message to the database, mark the
         // conversation as complete and return the data.

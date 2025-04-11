@@ -31,11 +31,11 @@ class C4Manager(
     private val logger = LoggerFactory.getLogger(C4Manager::class.java)
 
     /**
-     * Convert a structurizr workspace entity to a valid structurizr-compliant string for passing forward to an LLM.
+     * Convert a structurizr workspace entity to a valid structurizr-compliant string for passing
+     * forward to an LLM.
      *
      * Note: doesn't include a `views` or `styles` block (doesn't prevent it from being compiled)
-     *
-     * */
+     */
     fun gitRepoToStructurizrDsl(repoName: String): String {
         val workspace =
             c4NotationReadFacade.getRepositoryWorkspace(
@@ -47,7 +47,10 @@ class C4Manager(
         val relationships = c4NotationReadFacade.getRelationships(workspace.id)
         logger.info("Found ${relationships.size} relationships in repo $repoName")
         val memberToChildren = members.groupBy { it.parentId }
-        val componentsBlock = memberToChildren[null]!!.joinToString("\n|\t\t") { it.printWithChildren(memberToChildren, 2) }
+        val componentsBlock =
+            memberToChildren[null]!!.joinToString("\n|\t\t") {
+                it.printWithChildren(memberToChildren, 2)
+            }
         val relationshipsBlock = relationships.joinToString("\n|\t\t") { it.toStructurizrString() }
         return """
             |${workspace.toStructurizrString()}{
@@ -60,13 +63,13 @@ class C4Manager(
     }
 
     /**
-     * Convert a `Parent id -> list of children` map to a list of c4 entities, preserving parent-child relationships.
-     * */
+     * Convert a `Parent id -> list of children` map to a list of c4 entities, preserving parent-child
+     * relationships.
+     */
     private fun Map<String?, List<Element>>.toEntityList(
         workspaceId: UUID,
         idMappings: Map<String, UUID>,
-    ) = this.flatMap {
-            (parentId, children) ->
+    ) = this.flatMap { (parentId, children) ->
         val parentUUID = if (parentId != null) idMappings[parentId]!! else null
         children.map {
             C4ElementEntity(
@@ -80,7 +83,10 @@ class C4Manager(
                         is SoftwareSystem -> MemberType.SOFTWARE_SYSTEM
                         is Container -> MemberType.CONTAINER
                         is Component -> MemberType.COMPONENT
-                        else -> throw IllegalArgumentException("Unknown member type: ${it::class.qualifiedName}")
+                        else ->
+                            throw IllegalArgumentException(
+                                "Unknown member type: ${it::class.qualifiedName}",
+                            )
                     },
                 name = it.name,
                 description = it.description,
@@ -104,12 +110,12 @@ class C4Manager(
     }
 
     /**
-     * Consumes a structurizr file representing a single workspace and stores result to database.
-     * If the file is correct, the following entities will be created:
-     *  * A `Member` for each C4 component
-     *  * A `Relationship` for each relationship
-     *  * A `Workspace` entity linked to the provided github repo name
-     * */
+     * Consumes a structurizr file representing a single workspace and stores result to database. If
+     * the file is correct, the following entities will be created:
+     * * A `Member` for each C4 component
+     * * A `Relationship` for each relationship
+     * * A `Workspace` entity linked to the provided github repo name
+     */
     internal fun consumeStructurizrWorkspace(
         repoName: String,
         rawInput: String,
@@ -144,10 +150,13 @@ class C4Manager(
                 it.parent?.id
             } // group parsed components by their parent ID (null for top-level components)
         val stringIdToDbUUID =
-            rawComponents.map {
-                it.id
-            }.associateWith { UUID.randomUUID() } // assign a unique UUID (to be stored in the database) to each discovered component
-        // for each parentId (including null), create entities representing its children and associate them with the parent ID
+            rawComponents
+                .map { it.id }
+                .associateWith {
+                    UUID.randomUUID()
+                } // assign a unique UUID (to be stored in the database) to each discovered component
+        // for each parentId (including null), create entities representing its children and associate
+        // them with the parent ID
         val entities = rawComponentHierarchy.toEntityList(workspaceId, stringIdToDbUUID)
 
         val relationships =
@@ -156,7 +165,8 @@ class C4Manager(
 
         // write new entities to database and link the new workspace to github repo
         // TODO: discuss how to handle several c4 workspace creations
-        //  - do we delete the existing workspace? do we keep a list of workspaces (and creation date) for each repo?
+        //  - do we delete the existing workspace? do we keep a list of workspaces (and creation date)
+        // for each repo?
         transactionTemplate.execute {
             c4NotationWriteFacade.writeWorkspace(workspaceEntity)
             c4NotationWriteFacade.linkRepoToWorkspace(repoName, workspaceId)
@@ -172,13 +182,13 @@ class C4Manager(
         ) ?: throw NotFoundException.NotFoundByNameException(repoName, "github repo")
 
     /**
-     * For manual app operation/testing: create record of a github repo and associate a structurizr workspace with it.
-     *
+     * For manual app operation/testing: create record of a github repo and associate a structurizr
+     * workspace with it.
      * - If the repo does not exist in the system, this method will create a new record.
      * - If both the repo and the workspace exist, the operation will __completely__ overwrite it
      *
      * @param rawStructurizr The structurizr code representing the repo. __Must__ be valid.
-     * */
+     */
     @Transactional(rollbackFor = [StructurizrDslParserException::class])
     fun initializeWorkspace(
         repoName: String,
@@ -188,7 +198,9 @@ class C4Manager(
         // Step 1: check if repo exists and create a new one if not
         if (!c4NotationReadFacade.checkRepositoryExists(repoName)) {
             val repoId = UUID.randomUUID()
-            logger.info("Could not find repository with name $repoName, creating and assigning ID $repoId...")
+            logger.info(
+                "Could not find repository with name $repoName, creating and assigning ID $repoId...",
+            )
             c4NotationWriteFacade.writeRepository(repoId, repoName, repoUrl)
         } else {
             logger.info("Repository with name $repoName already exists, skipping creation step...")
@@ -217,12 +229,13 @@ class C4Manager(
      *
      * @param memberToChildren map of parent ID -> children
      * @param indent amount by which to offset component in the printed string (number of tabs)
-     * */
+     */
     internal fun C4ElementEntity.printWithChildren(
         memberToChildren: Map<UUID?, List<C4ElementEntity>>,
         indent: Int,
     ): String {
-        val header = "${this.variableName} = ${this.type.toStructurizrString()} \"${this.name}\" \"${this.description}\""
+        val header =
+            "${this.variableName} = ${this.type.toStructurizrString()} \"${this.name}\" \"${this.description}\""
         val children = memberToChildren[this.id]
         val indentString = "\t".repeat(indent)
         return header +

@@ -31,11 +31,9 @@ import java.util.UUID
 
 @AiAssistantTest
 class C4NotationWriteFacadeTest {
-    @Autowired
-    private lateinit var sut: C4NotationWriteFacade
+    @Autowired private lateinit var sut: C4NotationWriteFacade
 
-    @Autowired
-    private lateinit var ctx: DSLContext
+    @Autowired private lateinit var ctx: DSLContext
 
     @Nested
     @DisplayName("linkRepoToWorkspace()")
@@ -44,13 +42,9 @@ class C4NotationWriteFacadeTest {
         fun `can link github repository to C4 workspace`() {
             val repoName = "fancy-programmer/my-fancy-repo"
             val workspaceId = UUID.randomUUID()
-            gitRepo(createWorkspace = false) {
-                this.fullName = repoName
-            }.create(ctx)
+            gitRepo(createWorkspace = false) { this.fullName = repoName }.create(ctx)
 
-            workspace {
-                this.id = workspaceId
-            }.create(ctx)
+            workspace { this.id = workspaceId }.create(ctx)
 
             sut.linkRepoToWorkspace(repoName, workspaceId)
 
@@ -66,9 +60,7 @@ class C4NotationWriteFacadeTest {
         @Test
         fun `can write single C4 element`() {
             val workspaceId = UUID.randomUUID()
-            workspace {
-                this.id = workspaceId
-            }.create(ctx)
+            workspace { this.id = workspaceId }.create(ctx)
 
             val element =
                 C4ElementEntity(
@@ -95,9 +87,7 @@ class C4NotationWriteFacadeTest {
         @Test
         fun `can write multiple C4 elements`() {
             val workspaceId = UUID.randomUUID()
-            workspace {
-                this.id = workspaceId
-            }.create(ctx)
+            workspace { this.id = workspaceId }.create(ctx)
 
             val elements =
                 (0..<10).map {
@@ -174,8 +164,7 @@ class C4NotationWriteFacadeTest {
             } // for every ID, create a member entity
 
             val relationshipEntities =
-                fromMemberIds.zip(toMemberIds).map {
-                        (from, to) ->
+                fromMemberIds.zip(toMemberIds).map { (from, to) ->
                     C4RelationshipEntity(
                         from = from,
                         to = to,
@@ -187,11 +176,10 @@ class C4NotationWriteFacadeTest {
                 } // create 10 pairs of IDs and create relationship entities
 
             sut.writeRelationshipsList(relationshipEntities)
-            // check all relationships were created and the correct source and destination ID's are written to db
+            // check all relationships were created and the correct source and destination ID's are
+            // written to db
             expectThat(
-                ctx.selectFrom(RELATIONSHIP).fetch().map {
-                    it.startMember to it.endMember
-                },
+                ctx.selectFrom(RELATIONSHIP).fetch().map { it.startMember to it.endMember },
             ).hasSize(10)
                 .containsExactlyInAnyOrder(fromMemberIds.zip(toMemberIds))
         }
@@ -239,9 +227,7 @@ class C4NotationWriteFacadeTest {
             workspace { id = workspaceId }.create(ctx)
             val otherWorkspace = UUID.randomUUID()
 
-            expectThrows<DatabaseOperationException> {
-                sut.deleteWorkspace(otherWorkspace)
-            }
+            expectThrows<DatabaseOperationException> { sut.deleteWorkspace(otherWorkspace) }
         }
     }
 
@@ -310,9 +296,9 @@ class C4NotationWriteFacadeTest {
 
             sut.removeLinkToWorkspace(repoName, workspaceId)
 
-            expectThat(ctx.select(GITHUB_REPOSITORY.WORKSPACE_ID).from(GITHUB_REPOSITORY).fetch()).hasSize(1).and {
-                get { this.first().get(GITHUB_REPOSITORY.WORKSPACE_ID) }.isNull()
-            }
+            expectThat(ctx.select(GITHUB_REPOSITORY.WORKSPACE_ID).from(GITHUB_REPOSITORY).fetch())
+                .hasSize(1)
+                .and { get { this.first().get(GITHUB_REPOSITORY.WORKSPACE_ID) }.isNull() }
         }
 
         @Test
@@ -320,13 +306,9 @@ class C4NotationWriteFacadeTest {
             val workspaceId = UUID.randomUUID()
             val repoName = "some-coder/my-fancy-repo"
 
-            gitRepo(createWorkspace = false) {
-                fullName = repoName
-            }.create(ctx)
+            gitRepo(createWorkspace = false) { fullName = repoName }.create(ctx)
 
-            expectThrows<DatabaseOperationException> {
-                sut.removeLinkToWorkspace(repoName, workspaceId)
-            }
+            expectThrows<DatabaseOperationException> { sut.removeLinkToWorkspace(repoName, workspaceId) }
         }
 
         @Test
@@ -335,9 +317,7 @@ class C4NotationWriteFacadeTest {
             val repoName = "some-coder/my-fancy-repo"
 
             workspace { id = workspaceId }.create(ctx)
-            expectThrows<DatabaseOperationException> {
-                sut.removeLinkToWorkspace(repoName, workspaceId)
-            }
+            expectThrows<DatabaseOperationException> { sut.removeLinkToWorkspace(repoName, workspaceId) }
         }
     }
 }

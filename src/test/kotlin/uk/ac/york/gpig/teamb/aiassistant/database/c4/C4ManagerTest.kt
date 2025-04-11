@@ -33,11 +33,9 @@ import java.util.UUID
 
 @AiAssistantTest
 class C4ManagerTest {
-    @Autowired
-    private lateinit var sut: C4Manager
+    @Autowired private lateinit var sut: C4Manager
 
-    @Autowired
-    private lateinit var ctx: DSLContext
+    @Autowired private lateinit var ctx: DSLContext
 
     @Nested
     @DisplayName("Tests for retrieving a C4 model from the database")
@@ -53,9 +51,7 @@ class C4ManagerTest {
 
             gitRepo {
                 this.fullName = repoName
-                this.workspace {
-                    this.id = workspaceId
-                }
+                this.workspace { this.id = workspaceId }
             }.create(ctx)
 
             member {
@@ -65,9 +61,7 @@ class C4ManagerTest {
             }.create(ctx)
 
             relationship {
-                this.workspace {
-                    this.id = workspaceId
-                }
+                this.workspace { this.id = workspaceId }
                 this.startMember {
                     this.name = "my-controller"
                     this.id = controllerComponentId
@@ -93,8 +87,9 @@ class C4ManagerTest {
                 this.description = "prints error traces to stderr"
             }.create(ctx)
 
-            expectThat(sut.gitRepoToStructurizrDsl(repoName)).isEqualTo(
-                """
+            expectThat(sut.gitRepoToStructurizrDsl(repoName))
+                .isEqualTo(
+                    """
               |workspace "My fancy workspace" "My fancy description. Very cool!"{
               |   model {
               |       my-software-system = component "my-software-system" "handles incoming HTTP requests"{
@@ -106,8 +101,8 @@ class C4ManagerTest {
               |       my-controller -> my-repository "some cool relationship"
               |   }
               |}
-                """.trimMargin(),
-            )
+                    """.trimMargin(),
+                )
         }
     }
 
@@ -117,9 +112,7 @@ class C4ManagerTest {
         @Test
         fun `smoke test`() {
             // setup: create a git repo with no workspace
-            gitRepo(createWorkspace = false) {
-                this.fullName = "some-dev/my-weather-app"
-            }.create(ctx)
+            gitRepo(createWorkspace = false) { this.fullName = "some-dev/my-weather-app" }.create(ctx)
             // a valid structurizr string (components and relationships only, no style or view info)
             val rawStructurizr =
                 """
@@ -158,16 +151,19 @@ class C4ManagerTest {
             val createdWorkspace = ctx.selectFrom(WORKSPACE).fetch()
             expectThat(createdWorkspace).hasSize(1).and {
                 get { this[0].name }.isEqualTo("My-weather-app")
-                get {
-                    this[0].description
-                }.isEqualTo("A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.")
+                get { this[0].description }
+                    .isEqualTo(
+                        "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
+                    )
             }
 
             // check github repo has been linked to workspace
             val workspaceId = createdWorkspace.first().id
 
             expectThat(
-                ctx.fetchExists(GITHUB_REPOSITORY.where(GITHUB_REPOSITORY.WORKSPACE_ID.eq(workspaceId))),
+                ctx.fetchExists(
+                    GITHUB_REPOSITORY.where(GITHUB_REPOSITORY.WORKSPACE_ID.eq(workspaceId)),
+                ),
             ).isTrue()
 
             val createdComponents =
@@ -175,40 +171,54 @@ class C4ManagerTest {
                     it.get(MEMBER.NAME)!! to it.get(MEMBER.TYPE)!!
                 } // get a list of all created components, their names and types
             // check that all components are present
-            expectThat(createdComponents).hasSize(7).containsExactlyInAnyOrder(
-                "User" to MemberType.PERSON,
-                "Software System" to MemberType.SOFTWARE_SYSTEM,
-                "Database Schema" to MemberType.CONTAINER,
-                "Web Application" to MemberType.CONTAINER,
-                "Controllers" to MemberType.COMPONENT,
-                "Business logic" to MemberType.COMPONENT,
-                "Database Access" to MemberType.COMPONENT,
-            )
+            expectThat(createdComponents)
+                .hasSize(7)
+                .containsExactlyInAnyOrder(
+                    "User" to MemberType.PERSON,
+                    "Software System" to MemberType.SOFTWARE_SYSTEM,
+                    "Database Schema" to MemberType.CONTAINER,
+                    "Web Application" to MemberType.CONTAINER,
+                    "Controllers" to MemberType.COMPONENT,
+                    "Business logic" to MemberType.COMPONENT,
+                    "Database Access" to MemberType.COMPONENT,
+                )
             val endMemberAlias = MEMBER.`as`("end_member")
-            // for each relationship, get the names of the start and end components as well as the relationship description
+            // for each relationship, get the names of the start and end components as well as the
+            // relationship description
             val createdRelationships =
-                ctx.select()
+                ctx
+                    .select()
                     .from(RELATIONSHIP)
                     .join(MEMBER)
                     .on(MEMBER.ID.eq(RELATIONSHIP.START_MEMBER))
                     .join(endMemberAlias)
                     .on(endMemberAlias.ID.eq(RELATIONSHIP.END_MEMBER))
-                    .fetch { Triple(it.get(MEMBER.NAME)!!, it.get(endMemberAlias.NAME)!!, it.get(RELATIONSHIP.DESCRIPTION)) }
+                    .fetch {
+                        Triple(
+                            it.get(MEMBER.NAME)!!,
+                            it.get(endMemberAlias.NAME)!!,
+                            it.get(RELATIONSHIP.DESCRIPTION),
+                        )
+                    }
 
-            expectThat(createdRelationships).hasSize(5).containsExactlyInAnyOrder(
-                "Web Application" to "Database Schema" toTriple "Reads from and writes to",
-                "Business logic" to "Database Access" toTriple "Converts raw database output to easy-to-read JSON",
-                "Controllers" to "User" toTriple "Send and receive HTTP traffic",
-                "Controllers" to "Business logic" toTriple "Calls functions corresponding to user requests",
-                "Database Access" to "Database Schema" toTriple "Compiles and executes queries",
-            )
+            expectThat(createdRelationships)
+                .hasSize(5)
+                .containsExactlyInAnyOrder(
+                    "Web Application" to "Database Schema" toTriple "Reads from and writes to",
+                    "Business logic" to
+                        "Database Access" toTriple
+                        "Converts raw database output to easy-to-read JSON",
+                    "Controllers" to "User" toTriple "Send and receive HTTP traffic",
+                    "Controllers" to
+                        "Business logic" toTriple
+                        "Calls functions corresponding to user requests",
+                    "Database Access" to "Database Schema" toTriple "Compiles and executes queries",
+                )
         }
 
         @Test
         fun `throws for unknown github repository`() {
-            gitRepo(createWorkspace = false) {
-                this.fullName = "some-dev/my-weather-app"
-            }.create(ctx)
+            gitRepo(createWorkspace = false) { this.fullName = "some-dev/my-weather-app" }.create(ctx)
 
             expectThrows<NotFoundByNameException> {
                 sut.consumeStructurizrWorkspace(
@@ -220,7 +230,8 @@ class C4ManagerTest {
                     """,
                 )
             }.and {
-                get { this.message }.isEqualTo("Could not find github repository with name \"unknown-repo\"")
+                get { this.message }
+                    .isEqualTo("Could not find github repository with name \"unknown-repo\"")
             }
         }
     }
@@ -277,9 +288,10 @@ class C4ManagerTest {
             val readWorkspacesResult = ctx.selectFrom(WORKSPACE).fetchOne()
             expectThat(readWorkspacesResult).withNotNull {
                 get { this.name }.isEqualTo("My-weather-app")
-                get { this.description }.isEqualTo(
-                    "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
-                )
+                get { this.description }
+                    .isEqualTo(
+                        "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
+                    )
             }
             // 2.3 Check that the workspace was linked correctly (inspect the repo's foreign key)
             expectThat(readReposResult).withNotNull {
@@ -301,7 +313,9 @@ class C4ManagerTest {
                 sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
             }.and {
                 get { this.localizedMessage }
-                    .isEqualTo("Unexpected tokens (expected: workspace) at line 1: I AM SOME BAD STRUCTURIZR CODE!!! {{{{")
+                    .isEqualTo(
+                        "Unexpected tokens (expected: workspace) at line 1: I AM SOME BAD STRUCTURIZR CODE!!! {{{{",
+                    )
             }
 
             // check that repo was not created
@@ -396,9 +410,7 @@ class C4ManagerTest {
             gitRepo {
                 this.fullName = repoName
                 this.url = repoUrl
-                this.workspace {
-                    this.id = workspaceId
-                }
+                this.workspace { this.id = workspaceId }
             }.create(ctx)
 
             member {
@@ -408,9 +420,7 @@ class C4ManagerTest {
             }.create(ctx)
 
             relationship {
-                this.workspace {
-                    this.id = workspaceId
-                }
+                this.workspace { this.id = workspaceId }
                 this.startMember {
                     this.name = "my-OLD-controller"
                     this.id = controllerComponentId
@@ -440,14 +450,25 @@ class C4ManagerTest {
             sut.initializeWorkspace(repoName, repoUrl, rawStructurizr)
 
             // Step 1: check that none of the old components remain
-            val componentIds = ctx.select(MEMBER.ID).from(MEMBER).fetch().map { it.get(MEMBER.ID) }
-            val componentNames = ctx.select(MEMBER.NAME).from(MEMBER).fetch().map { it.get(MEMBER.NAME) }
+            val componentIds =
+                ctx
+                    .select(MEMBER.ID)
+                    .from(MEMBER)
+                    .fetch()
+                    .map { it.get(MEMBER.ID) }
+            val componentNames =
+                ctx
+                    .select(MEMBER.NAME)
+                    .from(MEMBER)
+                    .fetch()
+                    .map { it.get(MEMBER.NAME) }
             expect {
-                that(componentIds).doesNotContain(
-                    controllerComponentId,
-                    repoComponentId,
-                    loggerComponentId,
-                )
+                that(componentIds)
+                    .doesNotContain(
+                        controllerComponentId,
+                        repoComponentId,
+                        loggerComponentId,
+                    )
                 that(componentNames).none { contains("OLD") }
             }
 
@@ -458,9 +479,10 @@ class C4ManagerTest {
             val readWorkspacesResult = ctx.selectFrom(WORKSPACE).fetchOne()
             expectThat(readWorkspacesResult).withNotNull {
                 get { this.name }.isEqualTo("My-weather-app")
-                get { this.description }.isEqualTo(
-                    "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
-                )
+                get { this.description }
+                    .isEqualTo(
+                        "A simple yet powerful weather app with a database and an HTTP controller that returns cool JSON data.",
+                    )
             }
             // 2.3 Check that the workspace was linked correctly (inspect the repo's foreign key)
             val readReposResult = ctx.selectFrom(GITHUB_REPOSITORY).fetchOne()

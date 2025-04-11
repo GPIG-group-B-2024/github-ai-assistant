@@ -19,12 +19,10 @@ class StructurizrNotationController(
 ) {
     /**
      * An endpoint for manually storing a structurizr diagram and associating it with a github repo.
-     * */
+     */
     @PostMapping("/admin/structurizr")
     fun writeStructurizrRepresentation(
-        @Valid
-        @ModelAttribute("workspaceData")
-        workspaceData: StructurizrWorkspaceData,
+        @Valid @ModelAttribute("workspaceData") workspaceData: StructurizrWorkspaceData,
         bindingResult: BindingResult,
         model: Model,
     ): String {
@@ -36,7 +34,11 @@ class StructurizrNotationController(
             }
             return "/admin/structurizr/structurizr_input_form"
         }
-        c4Manager.initializeWorkspace(workspaceData.repoName, workspaceData.repoUrl, workspaceData.rawStructurizr)
+        c4Manager.initializeWorkspace(
+            workspaceData.repoName,
+            workspaceData.repoUrl,
+            workspaceData.rawStructurizr,
+        )
         return "/admin/structurizr/structurizr_success"
     }
 
